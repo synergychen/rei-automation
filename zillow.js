@@ -57,6 +57,13 @@ class Zillow {
     }
   }
 
+  query() {
+    if (!this.rawData) return ''
+    const windowTitle = this.rawData.searchPageSeoObject && this.rawData.searchPageSeoObject.windowTitle
+    const matched = windowTitle.match(/^(.+) Real Estate/)
+    return matched && matched[1]
+  }
+
   csvData() {
     return this.mappedData().map((e) => Object.values(e))
   }
