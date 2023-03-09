@@ -1,8 +1,15 @@
+let tableId = 'zillow-summary-table'
+
+function rerender(obj) {
+  const existingTables = [...document.querySelectorAll('#' + tableId)]
+  existingTables.forEach((table) => table.remove())
+  render(obj)
+}
+
 function render(obj) {
   // create a table element
   const table = document.createElement('table')
-  table.setAttribute('id', 'summary-table')
-  addStyles(tableStyles())
+  table.setAttribute('id', tableId)
 
   // loop through the object keys and create a table row for each key-value pair
   for (const key in obj) {
@@ -24,43 +31,28 @@ function render(obj) {
 
   // append the table to the body of the HTML document
   document.body.appendChild(table)
+  addTableStyles(table)
   return table
 }
 
-function addStyles(styleText) {
-  const styleElement = document.createElement('style')
-  styleElement.textContent = styleText
-  document.head.appendChild(styleElement)
+function addTableStyles(table) {
+  table.style.cssText =
+    'z-index: 1000; position: fixed; bottom: 30px; right: 40px; float: right; padding: 10px; background-color: #f2f2f2; border: 1px solid #ccc; opacity: 0.9;'
+  addStyles(
+    table,
+    'td',
+    'border: 1px solid #ddd; padding: 8px; text-align: left;'
+  )
+  addStyles(
+    table,
+    'tr td:first-child',
+    'background-color: rgb(216 216 216 / 36%); border: 1px solid #ddd; padding: 8px; text-align: left;'
+  )
+  addStyles(table, 'th', 'background-color: #4CAF50; color: white;')
 }
 
-function tableStyles() {
-  return `
-    #summary-table {
-        z-index: 1000;
-        position: fixed;
-        bottom: 30px;
-        right: 40px;
-        float: right;
-        padding: 10px;
-        background-color: #f2f2f2;
-        border: 1px solid #ccc;
-        opacity: 0.9;
-    }
-    #summary-table table {
-        border-collapse: collapse;
-        width: 100%;
-    }
-    #summary-table td, #summary-table th {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
-    }
-    #summary-table tr td:first-child {
-        background-color: rgb(216 216 216 / 36%);
-    }
-    #summary-table th {
-        background-color: #4CAF50;
-        color: white;
-    }
-    `
+function addStyles(parent, childSelector, cssText) {
+  ;[...parent.querySelectorAll(childSelector)].forEach((el) => {
+    el.style.cssText = cssText
+  })
 }
