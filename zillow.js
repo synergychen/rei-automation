@@ -1,5 +1,5 @@
 class Zillow {
-  constructor(rawData) {
+  constructor(rawData = null) {
     this.rawData = rawData
     this.dataMapping = {
       type: 'statusType',
@@ -22,6 +22,16 @@ class Zillow {
       rentZestimate: 'hdpData.homeInfo.rentZestimate',
       updatedAt: this._fetchUpdatedAt
     }
+  }
+
+  fetch(currentUrl) {
+    const dataUrl = this.jsonDataUrlFor(currentUrl)
+    return fetch(dataUrl)
+      .then((res) => res.json())
+      .then((rawData) => {
+        this.rawData = rawData
+        return rawData
+      })
   }
 
   summaryCsvData() {
@@ -56,6 +66,14 @@ class Zillow {
    * --- Get summary ---
    * -------------------
    */
+  jsonDataUrlFor(url) {
+    const urlParams = url.match(/(.+)\?(.+)/)[2]
+    const jsonDataUrlBase =
+      'https://www.zillow.com/search/GetSearchPageState.htm'
+    const jsonDataUrlParams = `${urlParams}&wants={%22cat1%22:[%22listResults%22,%22mapResults%22]}&requestId=3`
+    return `${jsonDataUrlBase}?${jsonDataUrlParams}`
+  }
+
   averagePrice(csvData) {
     const prices = csvData
       .map((item) => parseInt(item.price))
