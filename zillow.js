@@ -2,6 +2,7 @@ class Zillow {
   constructor(rawData = null) {
     this.rawData = rawData
     this.dataMapping = {
+      zpid: 'hdpData.homeInfo.zpid',
       type: 'statusType',
       address: this._fetchAddress,
       zipcode: 'hdpData.homeInfo.zipcode',
@@ -35,7 +36,26 @@ class Zillow {
   }
 
   summaryCsvData() {
-    return [Object.values(this.summary())]
+    const {
+      address,
+      bedrooms,
+      average,
+      median,
+      average_size,
+      median_size,
+      data_points
+    } = this.summary()
+    return [
+      [
+        address,
+        bedrooms,
+        average,
+        median,
+        average_size,
+        median_size,
+        data_points
+      ]
+    ]
   }
 
   summary() {
@@ -51,6 +71,8 @@ class Zillow {
       bedrooms,
       average: this.averagePrice(mappedData),
       median: this.medianPrice(mappedData),
+      '25th': this.median25thPrice(mappedData),
+      '75th': this.median75thPrice(mappedData),
       average_size: this.averageSize(mappedData),
       median_size: this.medianSize(mappedData),
       data_points: this.dataPoints(mappedData)
@@ -59,7 +81,9 @@ class Zillow {
 
   query() {
     if (!this.rawData) return ''
-    const windowTitle = this.rawData.searchPageSeoObject && this.rawData.searchPageSeoObject.windowTitle
+    const windowTitle =
+      this.rawData.searchPageSeoObject &&
+      this.rawData.searchPageSeoObject.windowTitle
     const matched = windowTitle.match(/^(.+) Real Estate/)
     return matched && matched[1]
   }
@@ -68,11 +92,6 @@ class Zillow {
     return this.mappedData().map((e) => Object.values(e))
   }
 
-  /**
-   * -------------------
-   * --- Get summary ---
-   * -------------------
-   */
   jsonDataUrlFor(url) {
     const urlParams = url.match(/(.+)\?(.+)/)[2]
     const jsonDataUrlBase =
@@ -93,6 +112,20 @@ class Zillow {
       .map((item) => parseInt(item.price))
       .filter((price) => price > 0)
     return this._median(prices)
+  }
+
+  median25thPrice(csvData) {
+    const prices = csvData
+      .map((item) => parseInt(item.price))
+      .filter((price) => price > 0)
+    return this._median25th(prices)
+  }
+
+  median75thPrice(csvData) {
+    const prices = csvData
+      .map((item) => parseInt(item.price))
+      .filter((price) => price > 0)
+    return this._median75th(prices)
   }
 
   averageSize(csvData) {
@@ -135,6 +168,24 @@ class Zillow {
         ? arr[midpoint]
         : (arr[midpoint - 1] + arr[midpoint]) / 2
     return median
+  }
+
+  _median25th(arr) {
+    if (arr.length == 0) {
+      return -1
+    }
+    arr.sort((a, b) => a - b)
+    const index = Math.ceil(0.25 * arr.length) - 1
+    return arr[index]
+  }
+
+  _median75th(arr) {
+    if (arr.length == 0) {
+      return -1
+    }
+    arr.sort((a, b) => a - b)
+    const index = Math.ceil(0.75 * arr.length) - 1
+    return arr[index]
   }
 
   /**
