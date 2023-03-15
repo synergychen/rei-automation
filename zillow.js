@@ -270,5 +270,3 @@ class Zillow {
     return `${year}-${month}-${day}`
   }
 }
-
-module.exports = Zillow

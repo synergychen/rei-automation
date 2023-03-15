@@ -1,8 +1,5 @@
-let tableId = 'zillow-summary-table'
-let mapDotClassNames = ['property-dot', 'property-pill']
-
 function rerender(obj) {
-  const existingTables = [...document.querySelectorAll('#' + tableId)]
+  const existingTables = [...document.querySelectorAll('#' + getTableId())]
   existingTables.forEach((table) => table.remove())
   render(obj)
 }
@@ -10,7 +7,7 @@ function rerender(obj) {
 function render(obj) {
   // create a table element
   const table = document.createElement('table')
-  table.setAttribute('id', tableId)
+  table.setAttribute('id', getTableId())
 
   // loop through the object keys and create a table row for each key-value pair
   for (const key in obj) {
@@ -40,7 +37,7 @@ function annotateMap(mappedData, summary) {
   const median = summary.median
   const median25th = summary['25th']
   const median75th = summary['75th']
-  mapDotClassNames.forEach((mapDotClassName) => {
+  getMapDotClassNames().forEach((mapDotClassName) => {
     const mapElements = [...document.querySelectorAll('.' + mapDotClassName)]
     // Create mapping: { [zpid]: [el] }
     const mapping = {}
@@ -104,4 +101,12 @@ function addStyles(parent, childSelector, cssText) {
   ;[...parent.querySelectorAll(childSelector)].forEach((el) => {
     el.style.cssText = cssText
   })
+}
+
+function getTableId() {
+  return 'zillow-summary-table'
+}
+
+function getMapDotClassNames() {
+  return ['property-dot', 'property-pill']
 }
