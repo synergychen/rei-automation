@@ -61,13 +61,16 @@ function summaryCsvData({ address, bedrooms, sold, forSale, rent }) {
 }
 
 function averageRentToPrice(rent, sold) {
-  const rentToPrice = rent.average / sold.average
-  return rentToPrice > 0 ? rentToPrice : ''
+  return rentToPrice(rent.average, sold.average)
 }
 
 function medianRentToPrice(rent, sold) {
-  const rentToPrice = rent.median / sold.median
-  return rentToPrice > 0 ? rentToPrice : ''
+  return rentToPrice(rent.median, sold.median)
+}
+
+function rentToPrice(rent, price) {
+  const ratio = rent / price
+  return ratio > 0 ? ratio : -1
 }
 
 function toDollar(amount) {
