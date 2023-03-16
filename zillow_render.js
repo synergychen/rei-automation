@@ -83,7 +83,7 @@ function getZillowIdByElement(el) {
 
 function addTableStyles(table) {
   table.style.cssText =
-    'z-index: 1000; position: fixed; bottom: 30px; right: 40px; float: right; padding: 10px; background-color: #f2f2f2; border: 1px solid #ccc; opacity: 0.9;'
+    'z-index: 100000; position: fixed; bottom: 30px; right: 40px; float: right; padding: 10px; background-color: #f2f2f2; border: 1px solid #ccc; opacity: 0.9;'
   addStyles(
     table,
     'td',
