@@ -19,6 +19,8 @@ class Rentometer {
       .textContent.trim()
     if (selectedTab.match(/zip code/i)) {
       return this.summaryForZipcode()
+    } else if (selectedTab.match(/address/i)) {
+      return this.summaryForAddress()
     }
     return {}
   }
@@ -36,6 +38,18 @@ class Rentometer {
         summary.data_points
       ]
     ]
+  }
+
+  summaryForAddress() {
+    return {
+      address: this.address,
+      bedrooms: this.bedrooms,
+      average: this.average,
+      median: this.average,
+      '25th': this.pct25th,
+      '75th': this.pct75th,
+      data_points: this.dataPoints
+    }
   }
 
   summaryForZipcode() {

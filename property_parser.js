@@ -8,6 +8,7 @@ class PropertyParser {
       price: this.price,
       bedrooms: this.bedrooms,
       bathrooms: this.bathrooms,
+      yearBuilt: this.yearBuilt,
       livingSize: this.livingSize,
       homeType: this.homeType
     }
@@ -22,6 +23,8 @@ class PropertyParser {
   get bedrooms() {}
 
   get bathrooms() {}
+
+  get yearBuilt() {}
 
   get livingSize() {}
 
@@ -60,6 +63,13 @@ class ZillowPropertyParser extends PropertyParser {
     const matched = document
       .querySelector('[data-testid="bed-bath-beyond"]')
       .textContent.match(/(\d) ba/)
+    return matched ? parseInt(matched[1]) : -1
+  }
+
+  get yearBuilt() {
+    const matched = document
+      .querySelector('.ds-data-view-list')
+      .textContent.match(/built in (\d{4})/i)
     return matched ? parseInt(matched[1]) : -1
   }
 
