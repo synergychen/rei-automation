@@ -9,7 +9,9 @@ class PropertyParser {
       bedrooms: this.bedrooms,
       bathrooms: this.bathrooms,
       yearBuilt: this.yearBuilt,
-      livingSize: this.livingSize,
+      sqft: this.sqft,
+      daysOnMarket: this.daysOnMarket,
+      propertyTaxes: this.propertyTaxes,
       homeType: this.homeType
     }
   }
@@ -26,7 +28,11 @@ class PropertyParser {
 
   get yearBuilt() {}
 
-  get livingSize() {}
+  get sqft() {}
+
+  get propertyTaxes() {}
+
+  get daysOnMarket() {}
 
   get homeType() {}
 
@@ -73,17 +79,31 @@ class ZillowPropertyParser extends PropertyParser {
     return matched ? parseInt(matched[1]) : -1
   }
 
-  get livingSize() {
+  get sqft() {
     const matched = document
       .querySelector('[data-testid="bed-bath-beyond"]')
       .textContent.match(/([\d|,]{4,7}) sqft/)
     return matched ? this.parseValue(matched[1]) : -1
   }
 
+  get propertyTaxes() {
+    const matched = document
+      .querySelector('.ds-data-view-list')
+      .textContent.match(/property taxes\$([\d|,]+)/i)
+    return matched ? this.parseValue(matched[1]) : -1
+  }
+
+  get daysOnMarket() {
+    const matched = document
+      .querySelector('.ds-data-view-list')
+      .textContent.match(/([\d|,]+) dayson zillow/i)
+    return matched ? this.parseValue(matched[1]) : -1
+  }
+
   get homeType() {
     const matched = document
       .querySelector('.data-view-container')
-      .innerText.match(/single family residence|townhouse/gi)
+      .innerText.match(/single family residence|townhouse|triplex|duplex/gi)
     return matched ? matched[0] : 'N/A'
   }
 }
