@@ -48,11 +48,26 @@ class Storage {
     return data
   }
 
+  reset() {
+    localStorage.setItem(this.key, JSON.stringify({}))
+  }
+
   get root() {
     return JSON.parse(localStorage.getItem(this.key))
   }
 
-  reset() {
-    localStorage.setItem(this.key, JSON.stringify({}))
+  get visited() {
+    return this.root['visited'] || {}
+  }
+
+  isVisited(address) {
+    return this.visited.hasOwnProperty(address)
+  }
+
+  visit(property) {
+    const visited = this.visited
+    visited[property.address] = property
+    this.set(`visited`, visited)
+    console.log(visited)
   }
 }

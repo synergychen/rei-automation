@@ -61,6 +61,29 @@ function annotateMap(mappedData, summary) {
   })
 }
 
+/**
+ * Add Google map link to address
+ */
+function annotateAddress() {
+  // Select the h1 element with the address
+  const addressElement = document.querySelector('.summary-container h1')
+  // Get the address text
+  const addressText = addressElement.textContent
+  // Create a new a element for the link
+  const link = document.createElement('a')
+  // Set the href attribute to the Google Maps URL with the address
+  link.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    addressText
+  )}`
+  // Set the target attribute to _blank to open the link in a new tab
+  link.target = '_blank'
+  // Set the link text to the address
+  link.textContent = addressText
+  // Replace the h1 content with the link
+  addressElement.innerHTML = ''
+  addressElement.appendChild(link)
+}
+
 function getElementById(zillowId) {
   return [...document.querySelectorAll('.' + mapDotClassName)].find((el) => {
     const propsName = Object.getOwnPropertyNames(el).find((e) =>
