@@ -43,7 +43,7 @@ class PropertyParser {
 
 class ZillowPropertyParser extends PropertyParser {
   get address() {
-    return document.querySelector('.summary-container h1').textContent
+    return document.querySelector('.summary-container h1').innerText
   }
 
   get zipcode() {
@@ -54,49 +54,49 @@ class ZillowPropertyParser extends PropertyParser {
   get price() {
     return this.parseValue(
       document.querySelector(".summary-container [data-testid='price']")
-        .textContent
+        .innerText
     )
   }
 
   get bedrooms() {
     const matched = document
       .querySelector('[data-testid="bed-bath-beyond"]')
-      .textContent.match(/(\d) bd/)
+      .innerText.match(/(\d) bd/)
     return matched ? parseInt(matched[1]) : -1
   }
 
   get bathrooms() {
     const matched = document
       .querySelector('[data-testid="bed-bath-beyond"]')
-      .textContent.match(/(\d) ba/)
+      .innerText.match(/(\d) ba/)
     return matched ? parseInt(matched[1]) : -1
   }
 
   get yearBuilt() {
     const matched = document
       .querySelector('.ds-data-view-list')
-      .textContent.match(/built in (\d{4})/i)
+      .innerText.match(/built in (\d{4})/i)
     return matched ? parseInt(matched[1]) : -1
   }
 
   get sqft() {
     const matched = document
       .querySelector('[data-testid="bed-bath-beyond"]')
-      .textContent.match(/([\d|,]{4,7}) sqft/)
+      .innerText.match(/([\d|,]{4,7}) sqft/)
     return matched ? this.parseValue(matched[1]) : -1
   }
 
   get propertyTaxes() {
     const matched = document
       .querySelector('.ds-data-view-list')
-      .textContent.match(/property taxes\$([\d|,]+)/i)
+      .innerText.match(/property taxes\$([\d|,]+)/i)
     return matched ? this.parseValue(matched[1]) : -1
   }
 
   get daysOnMarket() {
     const matched = document
       .querySelector('.ds-data-view-list')
-      .textContent.match(/([\d|,]+) dayson zillow/i)
+      .innerText.match(/([\d|,]+) dayson zillow/i)
     return matched ? this.parseValue(matched[1]) : -1
   }
 

@@ -16,7 +16,7 @@ class Rentometer {
   summary() {
     const selectedTab = document
       .querySelector('.search-type-tab.active a')
-      .textContent.trim()
+      .innerText.trim()
     if (selectedTab.match(/zip code/i)) {
       return this.summaryForZipcode()
     } else if (selectedTab.match(/address/i)) {
@@ -67,7 +67,7 @@ class Rentometer {
   parseZipcode() {
     const resultText = document
       .querySelector('h3.result-address-header')
-      .textContent.replace(/quickview/i, '')
+      .innerText.replace(/quickview/i, '')
       .trim()
       .match(/\d{5}$/)
     return resultText && resultText[0]
@@ -81,13 +81,13 @@ class Rentometer {
 
   parseAverage() {
     return this.parseValue(
-      document.querySelector("[title='Sample Mean']").textContent
+      document.querySelector("[title='Sample Mean']").innerText
     )
   }
 
   parseMedian() {
     return this.parseValue(
-      document.querySelector("[title='Sample Median']").textContent
+      document.querySelector("[title='Sample Median']").innerText
     )
   }
 
@@ -95,7 +95,7 @@ class Rentometer {
     return this.parseValue(
       document.querySelector(
         "[title^='This is the estimated value of the 25th']"
-      ).textContent
+      ).innerText
     )
   }
 
@@ -103,7 +103,7 @@ class Rentometer {
     return this.parseValue(
       document.querySelector(
         "[title^='This is the estimated value of the 75th']"
-      ).textContent
+      ).innerText
     )
   }
 

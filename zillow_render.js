@@ -16,8 +16,8 @@ function render(obj) {
     const valueCell = document.createElement('td')
 
     // set the text content for the key and value cells
-    keyCell.textContent = key
-    valueCell.textContent = obj[key]
+    keyCell.innerText = key
+    valueCell.innerText = obj[key]
 
     // add the cells to the row
     row.appendChild(keyCell)
@@ -68,17 +68,17 @@ function annotateAddress() {
   // Select the h1 element with the address
   const addressElement = document.querySelector('.summary-container h1')
   // Get the address text
-  const addressText = addressElement.textContent
+  const addressText = addressElement.innerText
   // Create a new a element for the link
   const link = document.createElement('a')
   // Set the href attribute to the Google Maps URL with the address
-  link.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+  link.href = `https://www.google.com/maps?q=${encodeURIComponent(
     addressText
   )}`
   // Set the target attribute to _blank to open the link in a new tab
   link.target = '_blank'
   // Set the link text to the address
-  link.textContent = addressText
+  link.innerText = addressText
   // Replace the h1 content with the link
   addressElement.innerHTML = ''
   addressElement.appendChild(link)

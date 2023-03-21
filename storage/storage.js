@@ -60,14 +60,22 @@ class Storage {
     return this.root['visited'] || {}
   }
 
+  find(address) {
+    return this.visited[this._sanitalize(address)]
+  }
+
   isVisited(address) {
-    return this.visited.hasOwnProperty(address)
+    return this.visited.hasOwnProperty(this._sanitalize(address))
   }
 
   visit(property) {
     const visited = this.visited
-    visited[property.address] = property
+    visited[this._sanitalize(property.address)] = property
     this.set(`visited`, visited)
     console.log(visited)
+  }
+
+  _sanitalize(address) {
+    return address.replace(/\u00A0/g, ' ')
   }
 }
