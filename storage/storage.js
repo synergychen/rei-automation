@@ -52,12 +52,24 @@ class Storage {
     localStorage.setItem(this.key, JSON.stringify({}))
   }
 
+  resetVisited() {
+    this.set('visited', {})
+  }
+
+  resetInterested() {
+    this.set('interested', {})
+  }
+
   get root() {
     return JSON.parse(localStorage.getItem(this.key))
   }
 
   get visited() {
     return this.root['visited'] || {}
+  }
+
+  get interested() {
+    return this.root['interested'] || {}
   }
 
   find(address) {
@@ -68,11 +80,29 @@ class Storage {
     return this.visited.hasOwnProperty(this._sanitalize(address))
   }
 
+  isInterested(address) {
+    return this.interested.hasOwnProperty(this._sanitalize(address))
+  }
+
   visit(property) {
     const visited = this.visited
     visited[this._sanitalize(property.address)] = property
     this.set(`visited`, visited)
     console.log(visited)
+  }
+
+  interest(address) {
+    const interested = this.interested
+    interested[this._sanitalize(address)] = true
+    this.set(`interested`, interested)
+    console.log(interested)
+  }
+
+  uninterest(address) {
+    const interested = this.interested
+    delete interested[this._sanitalize(address)]
+    this.set(`interested`, interested)
+    console.log(interested)
   }
 
   _sanitalize(address) {

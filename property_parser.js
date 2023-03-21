@@ -89,14 +89,16 @@ class ZillowPropertyParser extends PropertyParser {
   get propertyTaxes() {
     const matched = document
       .querySelector('.ds-data-view-list')
-      .innerText.match(/property taxes\$([\d|,]+)/i)
+      .innerText.replaceAll('\n', '')
+      .match(/property taxes\$([\d|,]+)/i)
     return matched ? this.parseValue(matched[1]) : -1
   }
 
   get daysOnMarket() {
     const matched = document
       .querySelector('.ds-data-view-list')
-      .innerText.match(/([\d|,]+) dayson zillow/i)
+      .innerText.replaceAll('\n', '')
+      .match(/([\d|,]+) dayson zillow/i)
     return matched ? this.parseValue(matched[1]) : -1
   }
 

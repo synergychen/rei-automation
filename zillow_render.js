@@ -33,6 +33,63 @@ function render(obj) {
   return table
 }
 
+function renderHomeSummary(storage) {
+  const addressElement = document.querySelector('.summary-container h1')
+  if (storage.isVisited(addressElement.innerText)) {
+    const property = storage.find(addressElement.innerText)
+    render({ 'Rent To Price': toPercent(property.estimatedRentToPrice) })
+  }
+}
+
+function renderInterestedButton(storage) {
+  const buttonId = 'interested-button'
+  if (document.querySelector('#' + buttonId)) {
+    console.log('Interested button already existed')
+    return
+  }
+  // Target sibling element where to insert after
+  const summaryContainer = document.querySelector('.summary-container')
+  const targetElement = summaryContainer.querySelector(
+    '[data-renderstrat="inline"]'
+  )
+  // Interested button
+  const interestedButton = document.createElement('button')
+  interestedButton.setAttribute('id', buttonId)
+  if (storage.isInterested(getAddress())) {
+    interestedButton.innerText = 'Interested'
+    interestedButton.style.cssText =
+      'background-color: #69f0ae; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: none; padding: 5px 10px'
+    interestedButton.addEventListener('click', () =>
+      _markAsUninterested(interestedButton, storage)
+    )
+  } else {
+    interestedButton.innerText = 'Not Interested'
+    interestedButton.style.cssText =
+      'background-color: white; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: 1px solid; padding: 5px 10px'
+    interestedButton.addEventListener('click', () =>
+      _markAsInterested(interestedButton, storage)
+    )
+  }
+  // Insert interested button after target element
+  targetElement.insertAdjacentElement('afterend', interestedButton)
+}
+
+function _markAsInterested(interestedButton, storage) {
+  const address = getAddress()
+  storage.interest(address)
+  interestedButton.innerText = 'Interested'
+  interestedButton.style.cssText =
+    'background-color: #69f0ae; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: none; padding: 5px 10px'
+}
+
+function _markAsUninterested(interestedButton, storage) {
+  const address = getAddress()
+  storage.uninterest(address)
+  interestedButton.innerText = 'Not Interested'
+  interestedButton.style.cssText =
+    'background-color: white; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: 1px solid; padding: 5px 10px'
+}
+
 function annotateMap(mappedData, summary) {
   const median = summary.median
   const median25th = summary['25th']
@@ -72,9 +129,7 @@ function annotateAddress() {
   // Create a new a element for the link
   const link = document.createElement('a')
   // Set the href attribute to the Google Maps URL with the address
-  link.href = `https://www.google.com/maps?q=${encodeURIComponent(
-    addressText
-  )}`
+  link.href = `https://www.google.com/maps?q=${encodeURIComponent(addressText)}`
   // Set the target attribute to _blank to open the link in a new tab
   link.target = '_blank'
   // Set the link text to the address
@@ -82,6 +137,13 @@ function annotateAddress() {
   // Replace the h1 content with the link
   addressElement.innerHTML = ''
   addressElement.appendChild(link)
+}
+
+function getAddress() {
+  // Select the h1 element with the address
+  const addressElement = document.querySelector('.summary-container h1')
+  // Get the address text
+  return addressElement.innerText
 }
 
 function getElementById(zillowId) {
