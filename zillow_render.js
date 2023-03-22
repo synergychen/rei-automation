@@ -33,12 +33,26 @@ function render(obj) {
   return table
 }
 
+async function annotateHomeDetails(storage) {
+  // Add link to address
+  annotateAddress()
+  // Add summary detail
+  await renderHomeSummary(storage)
+  // Add "Interested" button
+  await renderInterestedButton(storage)
+}
+
 async function renderHomeSummary(storage) {
   const addressElement = document.querySelector('.summary-container h1')
-  if (await storage.isVisited(addressElement.innerText)) {
-    const property = await storage.find(addressElement.innerText)
+  if (await storage.hasProperty(addressElement.innerText)) {
+    const property = await storage.findProperty(addressElement.innerText)
     if (property) {
-      render({ 'Rent To Price': toPercent(property.estimatedRentToPrice) })
+      render({
+        'Year': property.yearBuilt,
+        'Days on Market': property.daysOnMarket,
+        'Rent': property.estimatedRent,
+        'Rent To Price': toPercent(property.estimatedRentToPrice)
+      })
     } else {
       console.log('No analysis done for this property')
     }
@@ -46,52 +60,50 @@ async function renderHomeSummary(storage) {
 }
 
 async function renderInterestedButton(storage) {
-  const buttonId = 'interested-button'
-  if (document.querySelector('#' + buttonId)) {
-    console.log('Interested button already existed')
-    return
+  const interestedButtonId = 'interested-button'
+  if (document.querySelector('#' + interestedButtonId)) return
+
+  const interestedButton = document.createElement('button')
+  interestedButton.setAttribute('id', interestedButtonId)
+
+  const markAsInterested = async () => {
+    interestedButton.innerText = 'Interested'
+    interestedButton.style.cssText =
+      'background-color: #69f0ae; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: none; padding: 5px 10px'
+    await storage.interest(getAddress())
+    isInterested = true
   }
-  // Target sibling element where to insert after
+
+  const markAsUninterested = async () => {
+    interestedButton.innerText = 'Interested?'
+    interestedButton.style.cssText =
+      'background-color: white; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: 1px solid; padding: 5px 10px'
+    await storage.uninterest(getAddress())
+    isInterested = false
+  }
+
+  let isInterested = await storage.isInterested(getAddress())
+  const buttonLabel = isInterested ? 'Interested' : 'Interested?'
+  const buttonStyle = isInterested
+    ? 'background-color: #69f0ae; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: none; padding: 5px 10px'
+    : 'background-color: white; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: 1px solid; padding: 5px 10px'
+
+  interestedButton.innerText = buttonLabel
+  interestedButton.style.cssText = buttonStyle
+
+  interestedButton.addEventListener('click', async () => {
+    if (isInterested) {
+      await markAsUninterested()
+    } else {
+      await markAsInterested()
+    }
+  })
+
   const summaryContainer = document.querySelector('.summary-container')
   const targetElement = summaryContainer.querySelector(
     '[data-renderstrat="inline"]'
   )
-  // Interested button
-  const interestedButton = document.createElement('button')
-  interestedButton.setAttribute('id', buttonId)
-  if (await storage.isInterested(getAddress())) {
-    interestedButton.innerText = 'Interested'
-    interestedButton.style.cssText =
-      'background-color: #69f0ae; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: none; padding: 5px 10px'
-    interestedButton.addEventListener('click', () =>
-      _markAsUninterested(interestedButton, storage)
-    )
-  } else {
-    interestedButton.innerText = 'Not Interested'
-    interestedButton.style.cssText =
-      'background-color: white; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: 1px solid; padding: 5px 10px'
-    interestedButton.addEventListener('click', () =>
-      _markAsInterested(interestedButton, storage)
-    )
-  }
-  // Insert interested button after target element
   targetElement.insertAdjacentElement('afterend', interestedButton)
-}
-
-function _markAsInterested(interestedButton, storage) {
-  const address = getAddress()
-  storage.interest(address)
-  interestedButton.innerText = 'Interested'
-  interestedButton.style.cssText =
-    'background-color: #69f0ae; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: none; padding: 5px 10px'
-}
-
-function _markAsUninterested(interestedButton, storage) {
-  const address = getAddress()
-  storage.uninterest(address)
-  interestedButton.innerText = 'Not Interested'
-  interestedButton.style.cssText =
-    'background-color: white; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: 1px solid; padding: 5px 10px'
 }
 
 function annotateMap(mappedData, summary) {
