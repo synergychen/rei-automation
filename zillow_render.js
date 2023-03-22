@@ -33,15 +33,19 @@ function render(obj) {
   return table
 }
 
-function renderHomeSummary(storage) {
+async function renderHomeSummary(storage) {
   const addressElement = document.querySelector('.summary-container h1')
-  if (storage.isVisited(addressElement.innerText)) {
-    const property = storage.find(addressElement.innerText)
-    render({ 'Rent To Price': toPercent(property.estimatedRentToPrice) })
+  if (await storage.isVisited(addressElement.innerText)) {
+    const property = await storage.find(addressElement.innerText)
+    if (property) {
+      render({ 'Rent To Price': toPercent(property.estimatedRentToPrice) })
+    } else {
+      console.log('No analysis done for this property')
+    }
   }
 }
 
-function renderInterestedButton(storage) {
+async function renderInterestedButton(storage) {
   const buttonId = 'interested-button'
   if (document.querySelector('#' + buttonId)) {
     console.log('Interested button already existed')
@@ -55,7 +59,7 @@ function renderInterestedButton(storage) {
   // Interested button
   const interestedButton = document.createElement('button')
   interestedButton.setAttribute('id', buttonId)
-  if (storage.isInterested(getAddress())) {
+  if (await storage.isInterested(getAddress())) {
     interestedButton.innerText = 'Interested'
     interestedButton.style.cssText =
       'background-color: #69f0ae; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: none; padding: 5px 10px'
