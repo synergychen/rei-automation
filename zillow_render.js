@@ -1,41 +1,8 @@
-function rerender(obj) {
-  const existingTables = [...document.querySelectorAll('#' + getTableId())]
-  existingTables.forEach((table) => table.remove())
-  render(obj)
-}
-
-function render(obj) {
-  // create a table element
-  const table = document.createElement('table')
-  table.setAttribute('id', getTableId())
-
-  // loop through the object keys and create a table row for each key-value pair
-  for (const key in obj) {
-    const row = document.createElement('tr')
-    const keyCell = document.createElement('td')
-    const valueCell = document.createElement('td')
-
-    // set the text content for the key and value cells
-    keyCell.innerText = key
-    valueCell.innerText = obj[key]
-
-    // add the cells to the row
-    row.appendChild(keyCell)
-    row.appendChild(valueCell)
-
-    // add the row to the table
-    table.appendChild(row)
-  }
-
-  // append the table to the body of the HTML document
-  document.body.appendChild(table)
-  addTableStyles(table)
-  return table
-}
-
 async function annotateHomeDetails(storage) {
   // Add link to address
   annotateAddress()
+  // Add BP rent calculator link
+  await renderBPRentCalculatorLink(storage)
   // Add summary detail
   await renderHomeSummary(storage)
   // Add "Interested" button
@@ -43,19 +10,16 @@ async function annotateHomeDetails(storage) {
 }
 
 async function renderHomeSummary(storage) {
-  const addressElement = document.querySelector('.summary-container h1')
-  if (await storage.hasProperty(addressElement.innerText)) {
-    const property = await storage.findProperty(addressElement.innerText)
-    if (property) {
-      render({
-        'Year': property.yearBuilt,
-        'Days on Market': property.daysOnMarket,
-        'Rent': property.estimatedRent,
-        'Rent To Price': toPercent(property.estimatedRentToPrice)
-      })
-    } else {
-      console.log('No analysis done for this property')
-    }
+  const property = await getProperty(storage)
+  if (property) {
+    render({
+      Year: property.yearBuilt,
+      'Days on Market': property.daysOnMarket,
+      Rent: property.estimatedRent,
+      'Rent To Price': toPercent(property.estimatedRentToPrice)
+    })
+  } else {
+    console.log('No analysis done for this property')
   }
 }
 
@@ -106,6 +70,66 @@ async function renderInterestedButton(storage) {
   targetElement.insertAdjacentElement('afterend', interestedButton)
 }
 
+async function renderBPRentCalculatorLink(storage) {
+  const property = await getProperty(storage)
+  if (!property) return
+  const link = `https://www.biggerpockets.com/insights/locations?validated_address_search%5Baddress%5D=${property.address}+++&validated_address_search%5Bstructure_type%5D=&validated_address_search%5Bbeds%5D=${property.bedrooms}&validated_address_search%5Bbaths%5D=${property.bathrooms}&adjust_details=true&commit=Adjust+details`
+  const linkId = 'bp-rent-calculator'
+
+  addLink(linkId, link)
+}
+
+function addLink(linkId, link) {
+  if (document.querySelector('#' + linkId)) return
+  const el = document.createElement('a')
+  el.href = link
+  el.target = '_blank'
+  el.innerText = 'Rent'
+  el.style.cssText =
+    'border: 1px solid; border-radius: 5px; padding: 6px 10px; margin-left: 15px;'
+
+  const summaryContainer = document.querySelector('.summary-container')
+  const targetElement = summaryContainer.querySelector(
+    '[data-renderstrat="inline"]'
+  )
+  targetElement.insertAdjacentElement('afterend', el)
+}
+
+function rerender(obj) {
+  const existingTables = [...document.querySelectorAll('#' + getTableId())]
+  existingTables.forEach((table) => table.remove())
+  render(obj)
+}
+
+function render(obj) {
+  // create a table element
+  const table = document.createElement('table')
+  table.setAttribute('id', getTableId())
+
+  // loop through the object keys and create a table row for each key-value pair
+  for (const key in obj) {
+    const row = document.createElement('tr')
+    const keyCell = document.createElement('td')
+    const valueCell = document.createElement('td')
+
+    // set the text content for the key and value cells
+    keyCell.innerText = key
+    valueCell.innerText = obj[key]
+
+    // add the cells to the row
+    row.appendChild(keyCell)
+    row.appendChild(valueCell)
+
+    // add the row to the table
+    table.appendChild(row)
+  }
+
+  // append the table to the body of the HTML document
+  document.body.appendChild(table)
+  addTableStyles(table)
+  return table
+}
+
 function annotateMap(mappedData, summary) {
   const median = summary.median
   const median25th = summary['25th']
@@ -153,6 +177,10 @@ function annotateAddress() {
   // Replace the h1 content with the link
   addressElement.innerHTML = ''
   addressElement.appendChild(link)
+}
+
+async function getProperty(storage) {
+  return await storage.findProperty(getAddress())
 }
 
 function getAddress() {
