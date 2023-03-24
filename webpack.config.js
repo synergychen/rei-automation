@@ -1,13 +1,13 @@
 // Import the necessary modules
 const path = require('path')
-const glob = require('glob')
 
 // Export the webpack configuration
 module.exports = {
   // Set the entry point to all JavaScript files in the `src` directory and its subdirectories
   entry: {
-    app: glob.sync('./src/**/*.js').map((file) => `./${file}`)
+    app: './src/app.js'
   },
+  // entry: glob.sync('./src/**/*.js').map((file) => `./${file}`),
   // Define the output settings for the compiled JavaScript code
   output: {
     // Name the compiled JavaScript file `app.min.js`
