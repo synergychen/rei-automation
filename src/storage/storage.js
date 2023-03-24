@@ -201,3 +201,5 @@ class Storage {
     return address.replace(/\u00A0/g, ' ')
   }
 }
+
+module.exports = { Storage }

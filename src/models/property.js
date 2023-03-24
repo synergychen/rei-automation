@@ -99,3 +99,5 @@ class Property {
     return this.rentToPrice() >= percentThreshold / 100
   }
 }
+
+module.exports = { Property }

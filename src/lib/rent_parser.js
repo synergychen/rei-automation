@@ -1,4 +1,4 @@
-class Rentometer {
+class RentParser {
   constructor() {
     this.parse()
   }
@@ -119,3 +119,5 @@ class Rentometer {
     return parseInt(priceStr.replaceAll('$', '').replaceAll(',', ''))
   }
 }
+
+module.exports = { RentParser }

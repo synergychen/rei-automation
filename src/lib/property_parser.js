@@ -114,3 +114,5 @@ class ZillowPropertyParser extends PropertyParser {
     return matched ? matched[0] : 'N/A'
   }
 }
+
+module.exports = { PropertyParser, ZillowPropertyParser }
