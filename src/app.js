@@ -6,6 +6,7 @@ const paths = [
   "src/utils/constants.js",
   "src/utils/helpers.js",
   "src/utils/renderer.js",
+  "src/utils/session.js",
   "src/utils/summary.js",
   "src/utils/annotators/home_details_annotator.js",
   "src/utils/annotators/map_annotator.js",

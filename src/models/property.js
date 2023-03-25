@@ -1,6 +1,10 @@
 const { PROPERTY_ATTRIBTUES } = require('../utils/constants.js')
 
 class Property {
+  static TWO_BEDS_MEDIAN_SIZE = 1300
+  static THREE_BEDS_MEDIAN_SIZE = 1600
+  static FOUR_BEDS_MEDIAN_SIZE = 1900
+
   constructor({
     address = null,
     city = null,
@@ -81,6 +85,44 @@ class Property {
   isGoodDeal(percentThreshold = 0.7) {
     if (this.rentToPrice() < 0) return
     return this.rentToPrice() >= percentThreshold / 100
+  }
+
+  // Average house size for different bedrooms
+  // - 2-bedroom: 1,300
+  // - 3-bedroom: 1,600
+  // - 4-bedroom: 1,900
+  isLargeSize() {
+    switch (this.bedrooms) {
+      case 2:
+        if (this.sqft >= Property.THREE_BEDS_MEDIAN_SIZE) return true
+        break
+      case 3:
+        if (this.sqft >= Property.FOUR_BEDS_MEDIAN_SIZE) return true
+        break
+      case 4:
+        if (this.sqft >= Property.FOUR_BEDS_MEDIAN_SIZE + 300) return true
+        break;
+      default:
+        break;
+    }
+    return false
+  }
+
+  isSmallSize() {
+    switch (this.bedrooms) {
+      case 2:
+        if (this.sqft < Property.TWO_BEDS_MEDIAN_SIZE - 300) return true
+        break
+      case 3:
+        if (this.sqft < Property.TWO_BEDS_MEDIAN_SIZE) return true
+        break
+      case 4:
+        if (this.sqft < Property.THREE_BEDS_MEDIAN_SIZE) return true
+        break;
+      default:
+        break;
+    }
+    return false
   }
 }
 
