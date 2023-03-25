@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node scripts/update_paths.js && webpack --mode production"
+    "build": "node scripts/update_paths.js && rm dist/app.min.js && webpack --mode production"
   },
   "repository": {
     "type": "git",
