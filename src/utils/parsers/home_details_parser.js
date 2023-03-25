@@ -1,51 +1,21 @@
-class PropertyParser {
-  constructor() {}
+const { PROPERTY_ATTRIBTUES } = require('../constants.js')
+const { Property } = require('../../models/property.js')
+
+class HomeDetailsParser {
+  static parse() {
+    const parser = new HomeDetailsParser()
+    return new Property(parser.summary)
+  }
 
   get summary() {
-    return {
-      address: this.address,
-      zipcode: this.zipcode,
-      price: this.price,
-      bedrooms: this.bedrooms,
-      bathrooms: this.bathrooms,
-      yearBuilt: this.yearBuilt,
-      sqft: this.sqft,
-      daysOnMarket: this.daysOnMarket,
-      propertyTaxes: this.propertyTaxes,
-      homeType: this.homeType
-    }
+    const summary = {}
+    PROPERTY_ATTRIBTUES.forEach((property) => {
+      summary[property] = this[property]
+    })
+    return summary
   }
 
   get property() {}
-
-  get zipcode() {}
-
-  get address() {}
-
-  get price() {}
-
-  get bedrooms() {}
-
-  get bathrooms() {}
-
-  get yearBuilt() {}
-
-  get sqft() {}
-
-  get propertyTaxes() {}
-
-  get daysOnMarket() {}
-
-  get homeType() {}
-
-  parseValue(dollarAmount) {
-    return parseInt(dollarAmount.replace(/\$|,/g, ''))
-  }
-}
-
-class ZillowPropertyParser extends PropertyParser {
-  get property() {
-  }
 
   get address() {
     return document.querySelector('.summary-container h1').innerText
@@ -113,6 +83,10 @@ class ZillowPropertyParser extends PropertyParser {
       .innerText.match(/single family residence|townhouse|triplex|duplex/gi)
     return matched ? matched[0] : 'N/A'
   }
+
+  parseValue(dollarAmount) {
+    return parseInt(dollarAmount.replace(/\$|,/g, ''))
+  }
 }
 
-module.exports = { PropertyParser, ZillowPropertyParser }
+module.exports = { HomeDetailsParser }

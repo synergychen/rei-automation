@@ -1,22 +1,6 @@
-class Property {
-  // Define accessors dynamically based on a list of variables
-  static variables = [
-    'address',
-    'city',
-    'state',
-    'zipcode',
-    'homeType',
-    'price',
-    'bedrooms',
-    'bathrooms',
-    'yearBuilt',
-    'sqft',
-    'daysOnMarket',
-    'propertyTaxes',
-    'estimatedRent',
-    'estimatedRentToPrice'
-  ]
+const { PROPERTY_ATTRIBTUES } = require('../utils/constants.js')
 
+class Property {
   constructor({
     address = null,
     city = null,
@@ -34,7 +18,7 @@ class Property {
     estimatedRentToPrice = null
   } = {}) {
     // Set variables
-    for (const variable of Property.variables) {
+    for (const variable of PROPERTY_ATTRIBTUES) {
       this['_' + variable] = eval(variable)
       Object.defineProperty(this, variable, {
         get() {
