@@ -1,5 +1,6 @@
 const { Renderer } = require('../renderer.js')
 const { toPercent } = require('../helpers.js')
+const { currentProperty } = require('../session.js')
 
 class HomeDetailsAnnotator {
   constructor(storage) {
@@ -9,6 +10,8 @@ class HomeDetailsAnnotator {
   async annotate() {
     // Add link to address
     this.annotateAddress()
+    // Add size: large or small
+    await this.renderSizeChip()
     // Add BP rent calculator link
     await this.renderBPRentCalculatorLink()
     // Add summary detail
@@ -18,7 +21,7 @@ class HomeDetailsAnnotator {
   }
 
   async renderHomeSummary() {
-    const property = await this.getProperty()
+    const property = await currentProperty(this.storage)
     if (property) {
       Renderer.render({
         Year: property.yearBuilt,
@@ -78,8 +81,17 @@ class HomeDetailsAnnotator {
     targetElement.insertAdjacentElement('afterend', interestedButton)
   }
 
+  async renderSizeChip() {
+    const property = await currentProperty(this.storage)
+    if (property.isLargeSize()) {
+      this.addChip('size-chip', 'Large', '#b9f6ca')
+    } else if (property.isSmallSize()) {
+      this.addChip('size-chip', 'Small', '#ff8a80')
+    }
+  }
+
   async renderBPRentCalculatorLink() {
-    const property = await this.getProperty()
+    const property = await currentProperty(this.storage)
     if (!property) return
     const link = `https://www.biggerpockets.com/insights/locations?validated_address_search%5Baddress%5D=${property.address}+++&validated_address_search%5Bstructure_type%5D=&validated_address_search%5Bbeds%5D=${property.bedrooms}&validated_address_search%5Bbaths%5D=${property.bathrooms}&adjust_details=true&commit=Adjust+details`
     const linkId = 'bp-rent-calculator'
@@ -95,6 +107,19 @@ class HomeDetailsAnnotator {
     el.innerText = 'Rent'
     el.style.cssText =
       'border: 1px solid; border-radius: 5px; padding: 6px 10px; margin-left: 15px;'
+
+    const summaryContainer = document.querySelector('.summary-container')
+    const targetElement = summaryContainer.querySelector(
+      '[data-renderstrat="inline"]'
+    )
+    targetElement.insertAdjacentElement('afterend', el)
+  }
+
+  addChip(id, text, color) {
+    if (document.querySelector('#' + id)) return
+    const el = document.createElement('span')
+    el.innerText = text
+    el.style.cssText = `border: 1px solid ${color}; border-radius: 5px; padding: 6px 10px; margin-left: 15px; background-color: ${color}`
 
     const summaryContainer = document.querySelector('.summary-container')
     const targetElement = summaryContainer.querySelector(
@@ -124,10 +149,6 @@ class HomeDetailsAnnotator {
     // Replace the h1 content with the link
     addressElement.innerHTML = ''
     addressElement.appendChild(link)
-  }
-
-  async getProperty() {
-    return await this.storage.findProperty(this.getAddress())
   }
 
   getAddress() {
