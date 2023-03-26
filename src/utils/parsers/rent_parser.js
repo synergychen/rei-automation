@@ -1,97 +1,88 @@
+const { Rent } = require('../../models/rent.js')
+
 class RentParser {
   constructor() {
-    this.parse()
-  }
-
-  parse() {
-    this.zipcode = this.parseZipcode()
-    this.bedrooms = this.parseBedrooms()
-    this.average = this.parseAverage()
-    this.median = this.parseMedian()
-    this.pct25th = this.parse25th()
-    this.pct75th = this.parse75th()
-    this.dataPoints = this.parseDataPoints()
-  }
-
-  summary() {
-    const selectedTab = document
-      .querySelector('.search-type-tab.active a')
-      .innerText.trim()
-    if (selectedTab.match(/zip code/i)) {
-      return this.summaryForZipcode()
-    } else if (selectedTab.match(/address/i)) {
-      return this.summaryForAddress()
-    }
-    return {}
-  }
-
-  summaryCsvData() {
-    const summary = this.summary()
-    return [
-      [
-        summary.zipcode,
-        summary.bedrooms,
-        summary.average,
-        summary.median,
-        summary['25th'],
-        summary['75th'],
-        summary.data_points
-      ]
-    ]
-  }
-
-  summaryForAddress() {
-    return {
+    return new Rent({
       address: this.address,
-      bedrooms: this.bedrooms,
-      average: this.average,
-      median: this.average,
-      '25th': this.pct25th,
-      '75th': this.pct75th,
-      data_points: this.dataPoints
-    }
-  }
-
-  summaryForZipcode() {
-    return {
       zipcode: this.zipcode,
       bedrooms: this.bedrooms,
       average: this.average,
-      median: this.average,
-      '25th': this.pct25th,
-      '75th': this.pct75th,
-      data_points: this.dataPoints
+      median: this.median,
+      pct25th: this.pct25th,
+      pct75th: this.pct75th,
+      count: this.count,
+      source: null
+    })
+  }
+
+  static parse() {}
+
+  get address() {}
+
+  get zipcode() {}
+
+  get bedrooms() {}
+
+  get average() {}
+
+  get median() {}
+
+  get pct25th() {}
+
+  get pct75th() {}
+
+  get count() {}
+
+  parseValue(priceStr) {
+    return parseInt(priceStr.replaceAll('$', '').replaceAll(',', ''))
+  }
+}
+
+class RentometerRentParser extends RentParser {
+  static parse() {
+    const rent = new RentometerRentParser()
+    rent.setRentometer()
+    return rent
+  }
+
+  get address() {
+    if (this.useAddress()) {
+      return document.querySelector('#address_unified_search_address').value
     }
+    return null
   }
 
-  parseZipcode() {
-    const resultText = document
-      .querySelector('h3.result-address-header')
-      .innerText.replace(/quickview/i, '')
-      .trim()
-      .match(/\d{5}$/)
-    return resultText && resultText[0]
+  get zipcode() {
+    if (this.useZipcode()) {
+      const resultText = document
+        .querySelector('h3.result-address-header')
+        .innerText.replace(/quickview/i, '')
+        .trim()
+        .match(/\d{5}$/)
+      return resultText && resultText[0]
+    }
+    return null
   }
 
-  parseBedrooms() {
+  get bedrooms() {
     return parseInt(
       document.querySelector('select#zip_unified_search_bed_style').value
     )
   }
 
-  parseAverage() {
+  get average() {
     return this.parseValue(
       document.querySelector("[title='Sample Mean']").innerText
     )
   }
 
-  parseMedian() {
+  get median() {
     return this.parseValue(
       document.querySelector("[title='Sample Median']").innerText
     )
   }
 
-  parse25th() {
+  get pct25th() {
     return this.parseValue(
       document.querySelector(
         "[title^='This is the estimated value of the 25th']"
@@ -99,7 +90,7 @@ class RentParser {
     )
   }
 
-  parse75th() {
+  get pct75th() {
     return this.parseValue(
       document.querySelector(
         "[title^='This is the estimated value of the 75th']"
@@ -107,7 +98,7 @@ class RentParser {
     )
   }
 
-  parseDataPoints() {
+  get count() {
     const summary = document
       .querySelector('#active-results-container')
       .innerText.replaceAll('\n', '')
@@ -115,9 +106,72 @@ class RentParser {
     return parseInt(summary[1])
   }
 
-  parseValue(priceStr) {
-    return parseInt(priceStr.replaceAll('$', '').replaceAll(',', ''))
+  useAddress() {
+    const selectedTab = document
+      .querySelector('.search-type-tab.active a')
+      .innerText.trim()
+    return !!selectedTab.match(/address/i)
+  }
+
+  useZipcode() {
+    const selectedTab = document
+      .querySelector('.search-type-tab.active a')
+      .innerText.trim()
+    return !!selectedTab.match(/zip code/i)
   }
 }
 
-module.exports = { RentParser }
+class BiggerPocketsRentParser extends RentParser {
+  static parse() {
+    const rent = new BiggerPocketsRentParser()
+    rent.setBiggerPockets()
+    return rent
+  }
+
+  get address() {}
+
+  get zipcode() {}
+
+  get bedrooms() {}
+
+  get average() {}
+
+  get median() {}
+
+  get pct25th() {}
+
+  get pct75th() {}
+
+  get count() {}
+}
+
+class ZillowRentParser extends RentParser {
+  static parse() {
+    const rent = new ZillowRentParser()
+    rent.setZillow()
+    return rent
+  }
+
+  get address() {}
+
+  get zipcode() {}
+
+  get bedrooms() {}
+
+  get average() {}
+
+  get median() {}
+
+  get pct25th() {}
+
+  get pct75th() {}
+
+  get count() {}
+}
+
+module.exports = {
+  RentParser,
+  RentometerRentParser,
+  BiggerPocketsRentParser,
+  ZillowRentParser
+}
