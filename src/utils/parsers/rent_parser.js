@@ -1,4 +1,5 @@
 const { Rent } = require('../../models/rent.js')
+const { average, median, pct25th, pct75th } = require('../helpers.js')
 
 class RentParser {
   constructor() {
@@ -128,21 +129,57 @@ class BiggerPocketsRentParser extends RentParser {
     return rent
   }
 
-  get address() {}
+  get address() {
+    // Zip code
+    if (this.addressText && this.addressText.length === 5) return null
+    return this.addressText
+  }
 
-  get zipcode() {}
+  get zipcode() {
+    return this.addressText && this.addressText.length === 5
+      ? this.addressText
+      : null
+  }
 
-  get bedrooms() {}
+  get bedrooms() {
+    const el = document.querySelector('[name="validated_address_search[beds]"]')
+    return el && parseInt(el.value)
+  }
 
-  get average() {}
+  get average() {
+    return parseInt(average(this.rents))
+  }
 
-  get median() {}
+  get median() {
+    return parseInt(median(this.rents))
+  }
 
-  get pct25th() {}
+  get pct25th() {
+    return parseInt(pct25th(this.rents))
+  }
 
-  get pct75th() {}
+  get pct75th() {
+    return parseInt(pct75th(this.rents))
+  }
 
-  get count() {}
+  get count() {
+    return this.rents.length
+  }
+
+  get rents() {
+    const el = document.querySelector(
+      '.insights-result-comparable-properties-list-content'
+    )
+    if (!el) return null
+    return el.innerText
+      .match(/\$\d{1,3}(?:,\d{3})*(\.\d+)?/g)
+      .map((e) => this.parseValue(e))
+  }
+
+  get addressText() {
+    const el = document.querySelector('.insights-result-title')
+    return el && el.innerText.replace(/\n/g, ' ')
+  }
 }
 
 class ZillowRentParser extends RentParser {
