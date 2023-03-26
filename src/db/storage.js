@@ -1,5 +1,5 @@
 class Storage {
-  static VERSION = 3
+  static VERSION = 4
   static INTERESTED = 1
   static NOT_INTERESTED = -1
   static IS_DEAL = 1
@@ -88,6 +88,47 @@ class Storage {
     return await this.remove('deal', address)
   }
 
+  // ------------
+  // --- Rent ---
+  // ------------
+  async rents() {
+    return (await this.getAllData('rent'))
+  }
+
+  async hasRent(address) {
+    return !!(await this.read('rent', address))
+  }
+
+  async findRent(address, source) {
+    const rentVal = await this.read('rent', address)
+    if (!rentVal) return null
+    const rents = rentVal.rents
+    return rents.find(rent => rent.source === source)
+  }
+
+  async addRent(rent) {
+    const address = rent.address || rent.zipcode
+    const rentVal = await this.read('rent', address)
+    if (rentVal) {
+      const rents = rentVal.rents
+      const index = rents.findIndex(e => e.source === rent.source)
+      if (index !== -1) {
+        // Update when source found
+        rents[index] = rent
+      } else {
+        // Append when source not found
+        rents.push(rent)
+      }
+      return await this.write('rent', address, { rents })
+    } else {
+      return await this.write('rent', address, { rents: [rent] })
+    }
+  }
+
+  async removeRent(address) {
+    return await this.remove('rent', address)
+  }
+
   // ---------------
   // --- Helpers ---
   // ---------------
@@ -121,6 +162,12 @@ class Storage {
         }
         if (!db.objectStoreNames.contains('deal')) {
           db.createObjectStore('deal', {
+            keyPath: 'address',
+            autoIncrement: true
+          })
+        }
+        if (!db.objectStoreNames.contains('rent')) {
+          db.createObjectStore('rent', {
             keyPath: 'address',
             autoIncrement: true
           })

@@ -48,7 +48,9 @@ class RentometerRentParser extends RentParser {
 
   get address() {
     if (this.useAddress()) {
-      return document.querySelector('#address_unified_search_address').value
+      return document
+        .querySelector('#address_unified_search_address')
+        .value.replace(/, USA$/, '')
     }
     return null
   }
