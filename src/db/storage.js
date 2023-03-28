@@ -35,6 +35,10 @@ class Storage {
   }
 
   async addProperty(property) {
+    return this.updateProperty(property)
+  }
+
+  async updateProperty(property) {
     return !!(await this.write('property', property.address, property))
   }
 

@@ -1,7 +1,13 @@
 const { Storage } = require('../db/storage.js')
-const { Property } = require('../models/property.js')
 
-async function currentProperty() {
+function currentProperty() {
+  const property = HomeDetailsParser.parse()
+  return property.address && property.price && property.price > 0
+    ? property
+    : null
+}
+
+async function savedProperty() {
   const storage = await Storage.create()
   const property = HomeDetailsParser.parse()
   const propertySaved = await storage.findProperty(property.address)
@@ -11,4 +17,8 @@ async function currentProperty() {
   return property
 }
 
-module.exports = { currentProperty }
+async function currentStorage() {
+  return await Storage.create()
+}
+
+module.exports = { currentProperty, savedProperty, currentStorage }

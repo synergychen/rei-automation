@@ -31,7 +31,7 @@ class HomeDetailsAnnotator {
   }
 
   async renderHomeSummary() {
-    const property = await currentProperty()
+    const property = currentProperty()
     const rents = await this.storage.findRents(property.address)
     if (property && rents.length > 0) {
       const obj = {
@@ -97,7 +97,7 @@ class HomeDetailsAnnotator {
   }
 
   async renderDaysOnMarketChip() {
-    const property = await currentProperty()
+    const property = currentProperty()
     const daysOnMarket =
       property.daysOnMarket > 0
         ? Math.floor(property.daysOnMarket / 30) * 30
@@ -110,7 +110,7 @@ class HomeDetailsAnnotator {
   }
 
   async renderSizeChip() {
-    const property = await currentProperty()
+    const property = currentProperty()
     if (property.sqft < 0) return
 
     if (property.isLargeSize()) {
@@ -123,7 +123,7 @@ class HomeDetailsAnnotator {
   }
 
   async renderBPRentCalculatorLink() {
-    const property = await currentProperty()
+    const property = currentProperty()
     if (!property) return
     const link = `https://www.biggerpockets.com/insights/locations?validated_address_search%5Baddress%5D=${property.address}+++&validated_address_search%5Bstructure_type%5D=&validated_address_search%5Bbeds%5D=${property.bedrooms}&validated_address_search%5Bbaths%5D=${property.bathrooms}&adjust_details=true&commit=Adjust+details`
     const linkId = 'bp-rent-calculator'

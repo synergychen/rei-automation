@@ -21,16 +21,10 @@ class Property {
   } = {}) {
     // Set variables
     for (const variable of PROPERTY_ATTRIBTUES) {
-      this['_' + variable] = eval(variable)
-      Object.defineProperty(this, variable, {
-        get() {
-          return this[`_${variable}`]
-        },
-        set(value) {
-          this[`_${variable}`] = value
-        }
-      })
+      this[variable] = eval(variable)
     }
+
+    this.update()
   }
 
   get valid() {
@@ -39,25 +33,15 @@ class Property {
 
   update() {
     const { city, state, zipcode } = this.parseAddress()
-    this._city = city
-    this._state = state
-    this._zipcode = this._zipcode || zipcode
-  }
-
-  toJSON() {
-    const jsonObj = {}
-    for (const key in this) {
-      if (key.startsWith('_')) {
-        jsonObj[key.substring(1)] = this[key]
-      }
-    }
-    return jsonObj
+    this.city = city
+    this.state = state
+    this.zipcode = this.zipcode || zipcode
   }
 
   parseAddress() {
-    if (!this._address) return {}
+    if (!this.address) return {}
     try {
-      const parts = this._address.split(',').map((e) => e.trim())
+      const parts = this.address.split(',').map((e) => e.trim())
       const city = parts && parts[1]
       const matchedZipcode = parts[2].match(/\d{5}$/)
       const zipcode = matchedZipcode && matchedZipcode[0]
