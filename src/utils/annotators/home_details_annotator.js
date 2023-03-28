@@ -104,15 +104,21 @@ class HomeDetailsAnnotator {
         : -1
     if (daysOnMarket >= 30) {
       this.addChip('size-chip', `DOM: ${daysOnMarket}+`, COLORS.green)
+    } else {
+      this.addChip('size-chip', `DOM < 30`, COLORS.red)
     }
   }
 
   async renderSizeChip() {
     const property = await currentProperty()
+    if (property.sqft < 0) return
+
     if (property.isLargeSize()) {
-      this.addChip('size-chip', 'Large', COLORS.green)
+      this.addChip('size-chip', 'Size: L', COLORS.green)
     } else if (property.isSmallSize()) {
-      this.addChip('size-chip', 'Small', COLORS.red)
+      this.addChip('size-chip', 'Size: S', COLORS.red)
+    } else {
+      this.addChip('size-chip', 'Size: M', COLORS.gray)
     }
   }
 

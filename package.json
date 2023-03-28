@@ -9,7 +9,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "node scripts/update_paths.js && (rm dist/app.min.js || true) && webpack --mode production",
-    "amend": "npm run build && git add . && git commit --amend --no-edit && git push -f"
+    "amend": "npm run build && git add . && git commit --amend --no-edit && git push -f",
+    "commit": "npm run build && git add . && git commit"
   },
   "repository": {
     "type": "git",

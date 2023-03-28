@@ -14,6 +14,7 @@ const PROPERTY_ATTRIBTUES = [
 ]
 
 const COLORS = {
+  gray: '#e5e5e5',
   green: '#69f0ae',
   red: '#ff8a80'
 }
