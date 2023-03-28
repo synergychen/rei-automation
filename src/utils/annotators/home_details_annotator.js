@@ -1,10 +1,17 @@
+const { Storage } = require('../../db/storage.js')
 const { Renderer } = require('../renderer.js')
-const { toPercent } = require('../helpers.js')
+const { rentToPrice, toPercent } = require('../helpers.js')
 const { currentProperty } = require('../session.js')
 
 class HomeDetailsAnnotator {
   constructor(storage) {
     this.storage = storage
+  }
+
+  static async annotate() {
+    const storage = await Storage.create()
+    const annotator = new HomeDetailsAnnotator(storage)
+    await annotator.annotate()
   }
 
   async annotate() {
@@ -21,14 +28,20 @@ class HomeDetailsAnnotator {
   }
 
   async renderHomeSummary() {
-    const property = await currentProperty(this.storage)
-    if (property) {
-      Renderer.render({
+    const property = await currentProperty()
+    const rents = await this.storage.findRents(property.address)
+    if (property && rents.length > 0) {
+      const obj = {
         Year: property.yearBuilt,
-        'Days on Market': property.daysOnMarket,
-        Rent: property.estimatedRent,
-        'Rent To Price': toPercent(property.estimatedRentToPrice)
+        'Days on Market': property.daysOnMarket
+      }
+      rents.forEach((rent) => {
+        obj['Rent / ' + rent.source] = rent.median
+        obj['Ratio / ' + rent.source] = toPercent(
+          rentToPrice(rent.median, property.price)
+        )
       })
+      Renderer.render(obj)
     } else {
       console.log('No analysis done for this property')
     }
@@ -82,7 +95,7 @@ class HomeDetailsAnnotator {
   }
 
   async renderSizeChip() {
-    const property = await currentProperty(this.storage)
+    const property = await currentProperty()
     if (property.isLargeSize()) {
       this.addChip('size-chip', 'Large', '#b9f6ca')
     } else if (property.isSmallSize()) {
@@ -91,7 +104,7 @@ class HomeDetailsAnnotator {
   }
 
   async renderBPRentCalculatorLink() {
-    const property = await currentProperty(this.storage)
+    const property = await currentProperty()
     if (!property) return
     const link = `https://www.biggerpockets.com/insights/locations?validated_address_search%5Baddress%5D=${property.address}+++&validated_address_search%5Bstructure_type%5D=&validated_address_search%5Bbeds%5D=${property.bedrooms}&validated_address_search%5Bbaths%5D=${property.bathrooms}&adjust_details=true&commit=Adjust+details`
     const linkId = 'bp-rent-calculator'

@@ -1,3 +1,8 @@
+function rentToPrice(rent, price) {
+  if (rent <= 0 || price <= 0) return -1
+  return parseFloat((rent / price).toFixed(4))
+}
+
 function toDollar(amount) {
   if (amount < 0) return 'N/A'
   return amount
@@ -49,4 +54,12 @@ function pct75th(arr) {
   return arr[index]
 }
 
-module.exports = { toDollar, toPercent, average, median, pct25th, pct75th }
+module.exports = {
+  rentToPrice,
+  toDollar,
+  toPercent,
+  average,
+  median,
+  pct25th,
+  pct75th
+}
