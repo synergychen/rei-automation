@@ -4,10 +4,15 @@ class Storage {
   static NOT_INTERESTED = -1
   static IS_DEAL = 1
 
+  static instance = null
+
   static async create(databaseName = 'rei') {
-    const storage = new Storage(databaseName)
-    await storage.openDatabase()
-    return storage
+    if (!Storage.instance) {
+      console.log('Create new Storage instance')
+      Storage.instance = new Storage(databaseName)
+      await Storage.instance.openDatabase()
+    }
+    return Storage.instance
   }
 
   constructor(databaseName = 'rei') {
@@ -92,18 +97,24 @@ class Storage {
   // --- Rent ---
   // ------------
   async rents() {
-    return (await this.getAllData('rent'))
+    return await this.getAllData('rent')
   }
 
   async hasRent(address) {
     return !!(await this.read('rent', address))
   }
 
+  async findRents(address) {
+    const rentVal = await this.read('rent', address)
+    if (!rentVal) return null
+    return rentVal.rents
+  }
+
   async findRent(address, source) {
     const rentVal = await this.read('rent', address)
     if (!rentVal) return null
     const rents = rentVal.rents
-    return rents.find(rent => rent.source === source)
+    return rents.find((rent) => rent.source === source)
   }
 
   async addRent(rent) {
@@ -111,7 +122,7 @@ class Storage {
     const rentVal = await this.read('rent', address)
     if (rentVal) {
       const rents = rentVal.rents
-      const index = rents.findIndex(e => e.source === rent.source)
+      const index = rents.findIndex((e) => e.source === rent.source)
       if (index !== -1) {
         // Update when source found
         rents[index] = rent

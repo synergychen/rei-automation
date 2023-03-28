@@ -1,10 +1,12 @@
 const paths = [
   "src/app.js",
   "src/db/storage.js",
+  "src/models/deal.js",
   "src/models/property.js",
   "src/models/rent.js",
   "src/services/zillow.js",
   "src/utils/constants.js",
+  "src/utils/deal_analyzer.js",
   "src/utils/helpers.js",
   "src/utils/renderer.js",
   "src/utils/session.js",
