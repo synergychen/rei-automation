@@ -17,7 +17,8 @@ class Property {
     yearBuilt = null,
     sqft = null,
     daysOnMarket = null,
-    propertyTaxes = null
+    propertyTaxes = null,
+    priceHistory = []
   } = {}) {
     // Set variables
     for (const variable of PROPERTY_ATTRIBTUES) {
@@ -28,7 +29,76 @@ class Property {
   }
 
   get valid() {
-    return this.address.length > 5 && this.bedrooms > 0 && this.price > 0
+    return (
+      this.address.length > 5 &&
+      this.bedrooms > 0 &&
+      this.price > 0 &&
+      this.sqft > 0
+    )
+  }
+
+  // Average house size for different bedrooms
+  // - 2-bedroom: 1,300
+  // - 3-bedroom: 1,600
+  // - 4-bedroom: 1,900
+  get isLargeSize() {
+    switch (this.bedrooms) {
+      case 2:
+        if (this.sqft >= Property.THREE_BEDS_MEDIAN_SIZE) return true
+        break
+      case 3:
+        if (this.sqft >= Property.FOUR_BEDS_MEDIAN_SIZE) return true
+        break
+      case 4:
+        if (this.sqft >= Property.FOUR_BEDS_MEDIAN_SIZE + 300) return true
+        break
+      default:
+        break
+    }
+    return false
+  }
+
+  get isSmallSize() {
+    switch (this.bedrooms) {
+      case 2:
+        if (this.sqft < Property.TWO_BEDS_MEDIAN_SIZE - 300) return true
+        break
+      case 3:
+        if (this.sqft < Property.TWO_BEDS_MEDIAN_SIZE) return true
+        break
+      case 4:
+        if (this.sqft < Property.THREE_BEDS_MEDIAN_SIZE) return true
+        break
+      default:
+        break
+    }
+    return false
+  }
+
+  get priceIncreases() {
+    return this.priceHistory.filter((record) => {
+      return record.percentChange > 0
+    })
+  }
+
+  get priceDecreases() {
+    return this.priceHistory.filter((record) => {
+      return record.percentChange < 0
+    })
+  }
+
+  get totalPriceIncrease() {
+    return this.priceIncreases.reduce(
+      (total, { percentChange }) => total + percentChange,
+      0
+    )
+  }
+
+  get totalPriceDecrease() {
+    return this.priceDecreases.reduce(
+      (total, { percentChange }) => total + percentChange,
+      0
+    )
   }
 
   update() {
@@ -52,44 +122,6 @@ class Property {
       console.log(error)
       return {}
     }
-  }
-
-  // Average house size for different bedrooms
-  // - 2-bedroom: 1,300
-  // - 3-bedroom: 1,600
-  // - 4-bedroom: 1,900
-  isLargeSize() {
-    switch (this.bedrooms) {
-      case 2:
-        if (this.sqft >= Property.THREE_BEDS_MEDIAN_SIZE) return true
-        break
-      case 3:
-        if (this.sqft >= Property.FOUR_BEDS_MEDIAN_SIZE) return true
-        break
-      case 4:
-        if (this.sqft >= Property.FOUR_BEDS_MEDIAN_SIZE + 300) return true
-        break;
-      default:
-        break;
-    }
-    return false
-  }
-
-  isSmallSize() {
-    switch (this.bedrooms) {
-      case 2:
-        if (this.sqft < Property.TWO_BEDS_MEDIAN_SIZE - 300) return true
-        break
-      case 3:
-        if (this.sqft < Property.TWO_BEDS_MEDIAN_SIZE) return true
-        break
-      case 4:
-        if (this.sqft < Property.THREE_BEDS_MEDIAN_SIZE) return true
-        break;
-      default:
-        break;
-    }
-    return false
   }
 }
 

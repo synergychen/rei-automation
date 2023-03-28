@@ -18,6 +18,14 @@ class HomeDetailsAnnotator {
   async annotate() {
     // Add link to address
     this.annotateAddress()
+    // Render chips
+    this.renderChips()
+  }
+
+  async renderChips() {
+    await this.addChipsContainer()
+    // Add price changes
+    await this.renderPriceChanges()
     // Add days on market: 30 / 60 / 90 / 180 / 270 / 360
     await this.renderDaysOnMarketChip()
     // Add size: large or small
@@ -96,29 +104,71 @@ class HomeDetailsAnnotator {
     targetElement.insertAdjacentElement('afterend', interestedButton)
   }
 
-  async renderDaysOnMarketChip() {
+  async renderPriceChanges() {
+    const chipClassName = 'price-change-chip'
+    if (document.querySelector('.' + chipClassName)) return
+
     const property = currentProperty()
+    if (property.priceIncreases.length > 0) {
+      this.addChip(
+        chipClassName,
+        `Price Increase: ${property.totalPriceIncrease}% (${property.priceIncreases.length})`,
+        COLORS.lightRed,
+        COLORS.red
+      )
+    }
+    if (property.priceDecreases.length > 0) {
+      this.addChip(
+        chipClassName,
+        `Price Cut: ${property.totalPriceDecrease}% (${property.priceDecreases.length})`,
+        COLORS.lightGreen,
+        COLORS.green
+      )
+    }
+  }
+
+  async renderDaysOnMarketChip() {
+    const chipClassName = 'days-on-market-chip'
+    if (document.querySelector('.' + chipClassName)) return
+
+    const property = currentProperty()
+    const step = 30
     const daysOnMarket =
       property.daysOnMarket > 0
-        ? Math.floor(property.daysOnMarket / 30) * 30
+        ? Math.floor(property.daysOnMarket / step) * step
         : -1
-    if (daysOnMarket >= 30) {
-      this.addChip('size-chip', `DOM: ${daysOnMarket}+`, COLORS.green)
+    if (daysOnMarket >= step * 2) {
+      this.addChip(
+        chipClassName,
+        `DOM: ${daysOnMarket}+`,
+        COLORS.lightGreen,
+        COLORS.green
+      )
+    } else if (daysOnMarket >= step) {
+      this.addChip(
+        chipClassName,
+        `DOM: ${daysOnMarket}+`,
+        COLORS.lightYellow,
+        COLORS.yellow
+      )
     } else {
-      this.addChip('size-chip', `DOM < 30`, COLORS.red)
+      this.addChip(chipClassName, `DOM < 30`, COLORS.lightRed, COLORS.red)
     }
   }
 
   async renderSizeChip() {
+    const chipClassName = 'size-chip'
+    if (document.querySelector('.' + chipClassName)) return
+
     const property = currentProperty()
     if (property.sqft < 0) return
 
-    if (property.isLargeSize()) {
-      this.addChip('size-chip', 'Size: L', COLORS.green)
-    } else if (property.isSmallSize()) {
-      this.addChip('size-chip', 'Size: S', COLORS.red)
+    if (property.isLargeSize) {
+      this.addChip(chipClassName, 'Size: L', COLORS.lightGreen, COLORS.green)
+    } else if (property.isSmallSize) {
+      this.addChip(chipClassName, 'Size: S', COLORS.lightRed, COLORS.red)
     } else {
-      this.addChip('size-chip', 'Size: M', COLORS.gray)
+      this.addChip(chipClassName, 'Size: M', COLORS.lightGray, COLORS.gray)
     }
   }
 
@@ -147,17 +197,31 @@ class HomeDetailsAnnotator {
     targetElement.insertAdjacentElement('afterend', el)
   }
 
-  addChip(id, text, color) {
-    if (document.querySelector('#' + id)) return
-    const el = document.createElement('span')
+  addChip(className, text, bgColor, borderColor) {
+    const el = document.createElement('div')
     el.innerText = text
-    el.style.cssText = `border: 1px solid ${color}; border-radius: 5px; padding: 6px 10px; margin-left: 15px; background-color: ${color}`
+    el.classList.add(className)
+    el.style.cssText = `border: 1px solid ${borderColor}; border-radius: 5px; padding: 3px 5px; margin-left: 15px; background-color: ${bgColor};align-items: center; display: flex; height: 30px; margin-top: 10px;`
 
+    this.getChipsContainer().appendChild(el)
+  }
+
+  addChipsContainer() {
+    const id = 'chips-container'
+    if (document.querySelector('#' + id)) return
+
+    const el = document.createElement('div')
+    el.setAttribute('id', id)
+    el.style.cssText = 'display: flex; flex-wrap: wrap; margin-top: 5px;'
     const summaryContainer = document.querySelector('.summary-container')
     const targetElement = summaryContainer.querySelector(
       '[data-renderstrat="inline"]'
     )
     targetElement.insertAdjacentElement('afterend', el)
+  }
+
+  getChipsContainer() {
+    return document.querySelector('#chips-container')
   }
 
   /**

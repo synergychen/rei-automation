@@ -57,7 +57,7 @@ class HomeDetailsParser {
   get sqft() {
     const matched = document
       .querySelector('[data-testid="bed-bath-beyond"]')
-      .innerText.match(/([\d|,]{4,7}) sqft/)
+      .innerText.match(/([\d|,]{2,7}) sqft/)
     return matched ? this.parseValue(matched[1]) : -1
   }
 
@@ -84,8 +84,48 @@ class HomeDetailsParser {
     return matched ? matched[0] : 'N/A'
   }
 
+  get priceHistory() {
+    const history = [
+      ...document.querySelectorAll('.data-view-container li table tr')
+    ].map((tr) => tr.innerText.replace(/\t|\n/g, ' '))
+    return this.findPriceChanges(history, this.daysOnMarket)
+  }
+
   parseValue(dollarAmount) {
     return parseInt(dollarAmount.replace(/\$|,/g, ''))
+  }
+
+  findPriceChanges(rows, nDays) {
+    const today = new Date()
+    const timeThreshold = today.getTime() - nDays * 24 * 60 * 60 * 1000
+    const priceChangeRegex = /Price change\s+.*?\$(\d[\d,]*)\s+(-?\d*\.?\d*)%/
+    const dateRegex = /(\d{1,2}\/\d{1,2}\/\d{4})/
+    const priceChanges = []
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i]
+      if (!row.includes('Price change')) continue
+
+      const dateMatch = row.match(dateRegex)
+      if (!dateMatch) continue
+
+      const date = new Date(dateMatch[0])
+      if (date.getTime() < timeThreshold) continue
+
+      const priceMatch = row.match(priceChangeRegex)
+      if (!priceMatch) continue
+
+      const price = parseInt(priceMatch[1].replace(/,/g, ''))
+      const percentChange = parseFloat(priceMatch[2])
+      const formattedDate = date.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+      })
+      priceChanges.push({ date: formattedDate, price, percentChange })
+    }
+
+    return priceChanges
   }
 }
 

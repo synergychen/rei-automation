@@ -10,7 +10,6 @@ const paths = [
   "src/utils/helpers.js",
   "src/utils/renderer.js",
   "src/utils/session.js",
-  "src/utils/summary.js",
   "src/utils/annotators/home_details_annotator.js",
   "src/utils/annotators/map_annotator.js",
   "src/utils/parsers/home_details_parser.js",

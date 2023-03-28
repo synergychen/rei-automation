@@ -10,13 +10,19 @@ const PROPERTY_ATTRIBTUES = [
   'yearBuilt',
   'sqft',
   'daysOnMarket',
-  'propertyTaxes'
+  'propertyTaxes',
+  'priceHistory'
 ]
 
 const COLORS = {
-  gray: '#e5e5e5',
+  gray: '#EEEEEE',
+  lightGray: '#F5F5F5',
   green: '#69f0ae',
-  red: '#ff8a80'
+  lightGreen: '#B9F6CA',
+  red: '#FF5252',
+  lightRed: '#FFCCBC',
+  yellow: '#FFD740',
+  lightYellow: '#FFE57F'
 }
 
 module.exports = { PROPERTY_ATTRIBTUES, COLORS }
