@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node scripts/update_paths.js && (rm dist/app.min.js || true) && webpack --mode production"
+    "build": "node scripts/update_paths.js && (rm dist/app.min.js || true) && webpack --mode production",
+    "amend": "npm run build && git add . && git commit --amend --no-edit && git push -f"
   },
   "repository": {
     "type": "git",
@@ -20,8 +21,7 @@
     "url": "https://github.com/synergychen/rei-automation/issues"
   },
   "homepage": "https://github.com/synergychen/rei-automation#readme",
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "browser": {
     "fs": false,
     "path": false,

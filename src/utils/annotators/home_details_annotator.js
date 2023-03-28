@@ -1,5 +1,6 @@
 const { Storage } = require('../../db/storage.js')
 const { Renderer } = require('../renderer.js')
+const { COLORS } = require('../constants.js')
 const { rentToPrice, toPercent } = require('../helpers.js')
 const { currentProperty } = require('../session.js')
 
@@ -17,6 +18,8 @@ class HomeDetailsAnnotator {
   async annotate() {
     // Add link to address
     this.annotateAddress()
+    // Add days on market: 30 / 60 / 90 / 180 / 270 / 360
+    await this.renderDaysOnMarketChip()
     // Add size: large or small
     await this.renderSizeChip()
     // Add BP rent calculator link
@@ -56,8 +59,7 @@ class HomeDetailsAnnotator {
 
     const markAsInterested = async () => {
       interestedButton.innerText = 'Interested'
-      interestedButton.style.cssText =
-        'background-color: #69f0ae; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: none; padding: 5px 10px'
+      interestedButton.style.cssText = `background-color: ${COLORS.green}; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: none; padding: 5px 10px`
       await this.storage.interest(this.getAddress())
       isInterested = true
     }
@@ -73,7 +75,7 @@ class HomeDetailsAnnotator {
     let isInterested = await this.storage.isInterested(this.getAddress())
     const buttonLabel = isInterested ? 'Interested' : 'Interested?'
     const buttonStyle = isInterested
-      ? 'background-color: #69f0ae; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: none; padding: 5px 10px'
+      ? `background-color: ${COLORS.green}; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: 1px solid ${COLORS.green}; padding: 5px 10px`
       : 'background-color: white; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: 1px solid; padding: 5px 10px'
 
     interestedButton.innerText = buttonLabel
@@ -94,12 +96,23 @@ class HomeDetailsAnnotator {
     targetElement.insertAdjacentElement('afterend', interestedButton)
   }
 
+  async renderDaysOnMarketChip() {
+    const property = await currentProperty()
+    const daysOnMarket =
+      property.daysOnMarket > 0
+        ? Math.floor(property.daysOnMarket / 30) * 30
+        : -1
+    if (daysOnMarket >= 30) {
+      this.addChip('size-chip', `DOM: ${daysOnMarket}+`, COLORS.green)
+    }
+  }
+
   async renderSizeChip() {
     const property = await currentProperty()
     if (property.isLargeSize()) {
-      this.addChip('size-chip', 'Large', '#b9f6ca')
+      this.addChip('size-chip', 'Large', COLORS.green)
     } else if (property.isSmallSize()) {
-      this.addChip('size-chip', 'Small', '#ff8a80')
+      this.addChip('size-chip', 'Small', COLORS.red)
     }
   }
 
@@ -117,7 +130,7 @@ class HomeDetailsAnnotator {
     const el = document.createElement('a')
     el.href = link
     el.target = '_blank'
-    el.innerText = 'Rent'
+    el.innerText = 'BP Rent'
     el.style.cssText =
       'border: 1px solid; border-radius: 5px; padding: 6px 10px; margin-left: 15px;'
 

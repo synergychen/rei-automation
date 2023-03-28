@@ -17,9 +17,7 @@ class Property {
     yearBuilt = null,
     sqft = null,
     daysOnMarket = null,
-    propertyTaxes = null,
-    estimatedRent = null,
-    estimatedRentToPrice = null
+    propertyTaxes = null
   } = {}) {
     // Set variables
     for (const variable of PROPERTY_ATTRIBTUES) {
@@ -40,7 +38,6 @@ class Property {
   }
 
   update() {
-    this._estimatedRentToPrice = this.rentToPrice()
     const { city, state, zipcode } = this.parseAddress()
     this._city = city
     this._state = state
@@ -57,15 +54,6 @@ class Property {
     return jsonObj
   }
 
-  get estimatedRentToPricePercent() {
-    return parseFloat((this.estimatedRentToPrice * 100).toFixed(2))
-  }
-
-  rentToPrice() {
-    if (this.estimatedRent <= 0 || this.price <= 0) return -1
-    return this.estimatedRent / this.price
-  }
-
   parseAddress() {
     if (!this._address) return {}
     try {
@@ -80,11 +68,6 @@ class Property {
       console.log(error)
       return {}
     }
-  }
-
-  isGoodDeal(percentThreshold = 0.7) {
-    if (this.rentToPrice() < 0) return
-    return this.rentToPrice() >= percentThreshold / 100
   }
 
   // Average house size for different bedrooms

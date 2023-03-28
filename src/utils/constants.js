@@ -10,9 +10,12 @@ const PROPERTY_ATTRIBTUES = [
   'yearBuilt',
   'sqft',
   'daysOnMarket',
-  'propertyTaxes',
-  'estimatedRent',
-  'estimatedRentToPrice'
+  'propertyTaxes'
 ]
 
-module.exports = { PROPERTY_ATTRIBTUES }
+const COLORS = {
+  green: '#69f0ae',
+  red: '#ff8a80'
+}
+
+module.exports = { PROPERTY_ATTRIBTUES, COLORS }
