@@ -54,6 +54,22 @@ function pct75th(arr) {
   return arr[index]
 }
 
+function matchedTexts(selector, pattern) {
+  const element = document.querySelector(selector)
+  if (!element) {
+    return []
+  }
+  return element.innerText.replace(/\n/g, ' ').match(pattern)
+}
+
+function matchedText(selector, pattern) {
+  const element = document.querySelector(selector)
+  if (!element) {
+    return null
+  }
+  return element.innerText.replace(/\n/g, ' ').match(pattern)
+}
+
 module.exports = {
   rentToPrice,
   toDollar,
@@ -61,5 +77,7 @@ module.exports = {
   average,
   median,
   pct25th,
-  pct75th
+  pct75th,
+  matchedText,
+  matchedTexts
 }

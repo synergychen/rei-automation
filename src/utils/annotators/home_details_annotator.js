@@ -18,6 +18,12 @@ class HomeDetailsAnnotator {
   async annotate() {
     // Add link to address
     this.annotateAddress()
+    // Add summary detail
+    await this.renderHomeSummary()
+    // Add BP rent calculator link
+    await this.renderBPRentCalculatorLink()
+    // Add "Interested" button
+    await this.renderInterestedButton()
     // Render chips
     this.renderChips()
   }
@@ -30,12 +36,8 @@ class HomeDetailsAnnotator {
     await this.renderDaysOnMarketChip()
     // Add size: large or small
     await this.renderSizeChip()
-    // Add BP rent calculator link
-    await this.renderBPRentCalculatorLink()
-    // Add summary detail
-    await this.renderHomeSummary()
-    // Add "Interested" button
-    await this.renderInterestedButton()
+    // Add school rating
+    await this.renderSchoolChip()
   }
 
   async renderHomeSummary() {
@@ -169,6 +171,18 @@ class HomeDetailsAnnotator {
       this.addChip(chipClassName, 'Size: S', COLORS.lightRed, COLORS.red)
     } else {
       this.addChip(chipClassName, 'Size: M', COLORS.lightGray, COLORS.gray)
+    }
+  }
+
+  async renderSchoolChip() {
+    const chipClassName = 'school-chip'
+    if (document.querySelector('.' + chipClassName)) return
+
+    const property = currentProperty()
+    if (property.hasGoodSchool) {
+      this.addChip(chipClassName, `SCH: Good (${property.goodSchoolsCount})`, COLORS.lightGreen, COLORS.green)
+    } else if (property.allBadSchools) {
+      this.addChip(chipClassName, 'SCH: Bad', COLORS.lightRed, COLORS.red)
     }
   }
 

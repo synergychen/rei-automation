@@ -18,11 +18,12 @@ class Property {
     sqft = null,
     daysOnMarket = null,
     propertyTaxes = null,
+    schoolScores = [],
     priceHistory = []
   } = {}) {
     // Set variables
     for (const variable of PROPERTY_ATTRIBTUES) {
-      this[variable] = eval(variable)
+      this[variable] = arguments[0][variable]
     }
 
     this.update()
@@ -73,6 +74,18 @@ class Property {
         break
     }
     return false
+  }
+
+  get hasGoodSchool() {
+    return this.schoolScores.some(score => score >= 7)
+  }
+
+  get goodSchoolsCount() {
+    return this.schoolScores.filter(score => score >= 7).length
+  }
+
+  get allBadSchools() {
+    return this.schoolScores.every(score => score <= 4)
   }
 
   get priceIncreases() {

@@ -11,6 +11,7 @@ const PROPERTY_ATTRIBTUES = [
   'sqft',
   'daysOnMarket',
   'propertyTaxes',
+  'schoolScores',
   'priceHistory'
 ]
 
