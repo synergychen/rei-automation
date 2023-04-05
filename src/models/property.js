@@ -77,15 +77,15 @@ class Property {
   }
 
   get hasGoodSchool() {
-    return this.schoolScores.some(score => score >= 7)
+    return this.schoolScores.some((score) => score >= 7)
   }
 
   get goodSchoolsCount() {
-    return this.schoolScores.filter(score => score >= 7).length
+    return this.schoolScores.filter((score) => score >= 7).length
   }
 
   get allBadSchools() {
-    return this.schoolScores.every(score => score <= 4)
+    return this.schoolScores.every((score) => score <= 4)
   }
 
   get priceIncreases() {
@@ -108,10 +108,11 @@ class Property {
   }
 
   get totalPriceDecrease() {
-    return this.priceDecreases.reduce(
+    const total = this.priceDecreases.reduce(
       (total, { percentChange }) => total + percentChange,
       0
     )
+    return parseFloat(total.toFixed(2))
   }
 
   update() {

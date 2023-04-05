@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node scripts/update_paths.js && (rm dist/app.min.js || true) && webpack --mode production",
+    "build": "node scripts/update_paths.js && (rm dist/app.min.js || true) && webpack --mode production && cp dist/app.min.js ../chrome-extensions/zillow",
     "amend": "npm run build && git add . && git commit --amend --no-edit && git push -f",
     "commit": "npm run build && git add . && git commit"
   },
