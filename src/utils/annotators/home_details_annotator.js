@@ -1,7 +1,13 @@
 const { Storage } = require('../../db/storage.js')
 const { Renderer } = require('../renderer.js')
 const { COLORS } = require('../constants.js')
-const { rentToPrice, toPercent } = require('../helpers.js')
+const {
+  rentToPrice,
+  toPercent,
+  findElement,
+  findElementUntil,
+  doAfter
+} = require('../helpers.js')
 const { currentProperty } = require('../session.js')
 
 class HomeDetailsAnnotator {
@@ -20,6 +26,8 @@ class HomeDetailsAnnotator {
     this.annotateAddress()
     // Add summary detail
     await this.renderHomeSummary()
+    // Add lot lines
+    await this.renderLotLines()
     // Add BP rent calculator link
     await this.renderBPRentCalculatorLink()
     // Add "Interested" button
@@ -180,27 +188,59 @@ class HomeDetailsAnnotator {
 
     const property = currentProperty()
     if (property.hasGoodSchool) {
-      this.addChip(chipClassName, `SCH: Good (${property.goodSchoolsCount})`, COLORS.lightGreen, COLORS.green)
+      this.addChip(
+        chipClassName,
+        `SCH: Good (${property.goodSchoolsCount})`,
+        COLORS.lightGreen,
+        COLORS.green
+      )
     } else if (property.allBadSchools) {
       this.addChip(chipClassName, 'SCH: Bad', COLORS.lightRed, COLORS.red)
     }
+  }
+
+  async renderLotLines() {
+    const el = this.addLink('Lot Lines')
+    el.addEventListener('click', async () => {
+      const factsAndFeatures = await findElementUntil(
+        'a',
+        /facts and features/i,
+        3000
+      )
+      factsAndFeatures && factsAndFeatures.click()
+      const map = await findElementUntil(
+        '[data-zon="commute"] title',
+        /expand this map/i,
+        3000
+      )
+      if (!map) return
+      map.parentElement.parentElement.click()
+      const lotLinesButton = await findElementUntil(
+        'section#map-lightbox button',
+        /lot lines/i,
+        3000
+      )
+      lotLinesButton && lotLinesButton.click()
+    })
   }
 
   async renderBPRentCalculatorLink() {
     const property = currentProperty()
     if (!property) return
     const link = `https://www.biggerpockets.com/insights/locations?validated_address_search%5Baddress%5D=${property.address}+++&validated_address_search%5Bstructure_type%5D=&validated_address_search%5Bbeds%5D=${property.bedrooms}&validated_address_search%5Bbaths%5D=${property.bathrooms}&adjust_details=true&commit=Adjust+details`
-    const linkId = 'bp-rent-calculator'
 
-    this.addLink(linkId, link)
+    this.addLink('BP Rent', link)
   }
 
-  addLink(linkId, link) {
+  addLink(text, link = '') {
+    const linkId = text.replaceAll(' ', '-').toLowerCase()
     if (document.querySelector('#' + linkId)) return
     const el = document.createElement('a')
-    el.href = link
-    el.target = '_blank'
-    el.innerText = 'BP Rent'
+    if (link) {
+      el.href = link
+      el.target = '_blank'
+    }
+    el.innerText = text
     el.style.cssText =
       'border: 1px solid; border-radius: 5px; padding: 6px 10px; margin-left: 15px;'
 
@@ -209,6 +249,7 @@ class HomeDetailsAnnotator {
       '[data-renderstrat="inline"]'
     )
     targetElement.insertAdjacentElement('afterend', el)
+    return el
   }
 
   addChip(className, text, bgColor, borderColor) {
