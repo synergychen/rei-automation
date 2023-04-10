@@ -1,13 +1,13 @@
-const { Storage } = require('../db/storage.js')
+const { DataAPI } = require('../db/data_api.js')
 const { Deal } = require('../models/deal.js')
 
 class DealAnalyzer {
   static async goodDeals(percentThreshold = 0.7) {
-    const storage = await Storage.create()
-    const properties = await storage.properties()
+    const dataApi = new DataAPI()
+    const properties = await dataApi.properties()
     const filteredProperties = await Promise.all(
       properties.map(async (property) => {
-        const rents = await storage.findRents(property.address)
+        const rents = await dataApi.findRents(property.address)
         const deal = new Deal({
           property,
           rents,
@@ -20,10 +20,10 @@ class DealAnalyzer {
   }
 
   static async isGoodDeal(address, percentThreshold = 0.7) {
-    const storage = await Storage.create()
-    const property = await storage.findProperty(address)
+    const dataApi = new DataAPI()
+    const property = await dataApi.findProperty(address)
     if (!property) return
-    const rents = await storage.findRents(property.address)
+    const rents = await dataApi.findRents(property.address)
     const deal = new Deal({
       property,
       rents,

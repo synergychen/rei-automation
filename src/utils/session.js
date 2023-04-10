@@ -1,4 +1,4 @@
-const { Storage } = require('../db/storage.js')
+const { DataAPI } = require('../db/data_api.js')
 
 function currentProperty() {
   const property = HomeDetailsParser.parse()
@@ -8,17 +8,10 @@ function currentProperty() {
 }
 
 async function savedProperty() {
-  const storage = await Storage.create()
+  const dataApi = new DataAPI()
   const property = HomeDetailsParser.parse()
-  const propertySaved = await storage.findProperty(property.address)
-  if (propertySaved) {
-    return new Property(propertySaved)
-  }
-  return property
+  const propertySaved = await dataApi.findProperty(property.address)
+  return propertySaved && new Property(propertySaved)
 }
 
-async function currentStorage() {
-  return await Storage.create()
-}
-
-module.exports = { currentProperty, savedProperty, currentStorage }
+module.exports = { currentProperty, savedProperty }

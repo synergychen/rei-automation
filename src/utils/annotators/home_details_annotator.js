@@ -1,23 +1,16 @@
-const { Storage } = require('../../db/storage.js')
+const { DataAPI } = require('../../db/data_api.js')
 const { Renderer } = require('../renderer.js')
 const { COLORS } = require('../constants.js')
-const {
-  rentToPrice,
-  toPercent,
-  findElement,
-  findElementUntil,
-  doAfter
-} = require('../helpers.js')
+const { rentToPrice, toPercent, findElementUntil } = require('../helpers.js')
 const { currentProperty } = require('../session.js')
 
 class HomeDetailsAnnotator {
-  constructor(storage) {
-    this.storage = storage
+  constructor() {
+    this.dataApi = new DataAPI()
   }
 
   static async annotate() {
-    const storage = await Storage.create()
-    const annotator = new HomeDetailsAnnotator(storage)
+    const annotator = new HomeDetailsAnnotator()
     await annotator.annotate()
   }
 
@@ -28,8 +21,10 @@ class HomeDetailsAnnotator {
     await this.renderHomeSummary()
     // Add lot lines
     await this.renderLotLines()
+    // Add Rentometer link
+    await this.renderRentometerLink()
     // Add BP rent calculator link
-    await this.renderBPRentCalculatorLink()
+    await this.renderBPRentLink()
     // Add "Interested" button
     await this.renderInterestedButton()
     // Render chips
@@ -50,7 +45,7 @@ class HomeDetailsAnnotator {
 
   async renderHomeSummary() {
     const property = currentProperty()
-    const rents = await this.storage.findRents(property.address)
+    const rents = (await this.dataApi.findRents(property.address)) || []
     if (property && rents.length > 0) {
       const obj = {
         Year: property.yearBuilt,
@@ -78,7 +73,7 @@ class HomeDetailsAnnotator {
     const markAsInterested = async () => {
       interestedButton.innerText = 'Interested'
       interestedButton.style.cssText = `background-color: ${COLORS.green}; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: none; padding: 5px 10px`
-      await this.storage.interest(this.getAddress())
+      await this.dataApi.addInterested(this.getAddress())
       isInterested = true
     }
 
@@ -86,11 +81,11 @@ class HomeDetailsAnnotator {
       interestedButton.innerText = 'Interested?'
       interestedButton.style.cssText =
         'background-color: white; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: 1px solid; padding: 5px 10px'
-      await this.storage.uninterest(this.getAddress())
+      await this.dataApi.removeInterested(this.getAddress())
       isInterested = false
     }
 
-    let isInterested = await this.storage.isInterested(this.getAddress())
+    let isInterested = await this.dataApi.isInterestedIn(this.getAddress())
     const buttonLabel = isInterested ? 'Interested' : 'Interested?'
     const buttonStyle = isInterested
       ? `background-color: ${COLORS.green}; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: 1px solid ${COLORS.green}; padding: 5px 10px`
@@ -224,12 +219,20 @@ class HomeDetailsAnnotator {
     })
   }
 
-  async renderBPRentCalculatorLink() {
+  async renderBPRentLink() {
     const property = currentProperty()
     if (!property) return
     const link = `https://www.biggerpockets.com/insights/locations?validated_address_search%5Baddress%5D=${property.address}+++&validated_address_search%5Bstructure_type%5D=&validated_address_search%5Bbeds%5D=${property.bedrooms}&validated_address_search%5Bbaths%5D=${property.bathrooms}&adjust_details=true&commit=Adjust+details`
 
     this.addLink('BP Rent', link)
+  }
+
+  async renderRentometerLink() {
+    const property = currentProperty()
+    if (!property) return
+    const link = `https://www.rentometer.com/?address=${property.address}&bedrooms=${property.bedrooms}`
+
+    this.addLink('Rentometer', link)
   }
 
   addLink(text, link = '') {
