@@ -2,14 +2,20 @@ const { DataAPI } = require('../../db/data_api.js')
 const { Renderer } = require('../renderer.js')
 const { COLORS } = require('../constants.js')
 const { rentToPrice, toPercent, findElementUntil } = require('../helpers.js')
-const { currentProperty } = require('../session.js')
+const { currentProperty, savedProperty } = require('../session.js')
 
 class HomeDetailsAnnotator {
   constructor() {
     this.dataApi = new DataAPI()
+    this.property = currentProperty()
   }
 
   static async annotate() {
+    if (!currentProperty()) {
+      console.log('Current property not exists')
+      return
+    }
+
     const annotator = new HomeDetailsAnnotator()
     await annotator.annotate()
   }
@@ -19,20 +25,31 @@ class HomeDetailsAnnotator {
     this.annotateAddress()
     // Add summary detail
     await this.renderHomeSummary()
-    // Add lot lines
-    await this.renderLotLines()
+    // Render links
+    await this.renderLinks()
+    // Render chips
+    await this.renderChips()
+  }
+
+  async renderLinks() {
+    this.addContainer('links-container')
+    if (await savedProperty()) {
+      // Add "Interested" link
+      await this.renderInterestedLink()
+    } else {
+      // Add "Analyze" link
+      this.renderAnalyzeLink()
+    }
     // Add Rentometer link
     await this.renderRentometerLink()
     // Add BP rent calculator link
     await this.renderBPRentLink()
-    // Add "Interested" button
-    await this.renderInterestedButton()
-    // Render chips
-    this.renderChips()
+    // Add lot lines
+    await this.renderLotLines()
   }
 
   async renderChips() {
-    await this.addChipsContainer()
+    this.addContainer('chips-container')
     // Add price changes
     await this.renderPriceChanges()
     // Add days on market: 30 / 60 / 90 / 180 / 270 / 360
@@ -63,16 +80,16 @@ class HomeDetailsAnnotator {
     }
   }
 
-  async renderInterestedButton() {
+  async renderInterestedLink() {
     const interestedButtonId = 'interested-button'
     if (document.querySelector('#' + interestedButtonId)) return
 
-    const interestedButton = document.createElement('button')
+    const interestedButton = document.createElement('a')
     interestedButton.setAttribute('id', interestedButtonId)
 
     const markAsInterested = async () => {
       interestedButton.innerText = 'Interested'
-      interestedButton.style.cssText = `background-color: ${COLORS.green}; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: none; padding: 5px 10px`
+      interestedButton.style.cssText = `background-color: ${COLORS.green}; border-radius: 5px; margin-left: 15px; border: none; padding: 5px 10px; text-decoration: none; color: inherit;`
       await this.dataApi.addInterested(this.getAddress())
       isInterested = true
     }
@@ -80,7 +97,7 @@ class HomeDetailsAnnotator {
     const markAsUninterested = async () => {
       interestedButton.innerText = 'Interested?'
       interestedButton.style.cssText =
-        'background-color: white; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: 1px solid; padding: 5px 10px'
+        'background-color: white; border-radius: 5px; margin-left: 15px; border: 1px solid; padding: 5px 10px; text-decoration: none; color: inherit;'
       await this.dataApi.removeInterested(this.getAddress())
       isInterested = false
     }
@@ -88,8 +105,8 @@ class HomeDetailsAnnotator {
     let isInterested = await this.dataApi.isInterestedIn(this.getAddress())
     const buttonLabel = isInterested ? 'Interested' : 'Interested?'
     const buttonStyle = isInterested
-      ? `background-color: ${COLORS.green}; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: 1px solid ${COLORS.green}; padding: 5px 10px`
-      : 'background-color: white; border-radius: 5px; margin-left: 15px; margin-top: 10px; border: 1px solid; padding: 5px 10px'
+      ? `background-color: ${COLORS.green}; border-radius: 5px; margin-left: 15px; border: 1px solid ${COLORS.green}; padding: 5px 10px; text-decoration: none; color: inherit;`
+      : 'background-color: white; border-radius: 5px; margin-left: 15px; border: 1px solid; padding: 5px 10px; text-decoration: none; color: inherit;'
 
     interestedButton.innerText = buttonLabel
     interestedButton.style.cssText = buttonStyle
@@ -102,11 +119,25 @@ class HomeDetailsAnnotator {
       }
     })
 
-    const summaryContainer = document.querySelector('.summary-container')
-    const targetElement = summaryContainer.querySelector(
-      '[data-renderstrat="inline"]'
-    )
-    targetElement.insertAdjacentElement('afterend', interestedButton)
+    const targetElement = document.querySelector('#links-container')
+    targetElement.append(interestedButton)
+  }
+
+  renderAnalyzeLink() {
+    const element = this.addLink('Analyze')
+    element.href = '#'
+    const urls = [
+      // BP link
+      `https://www.biggerpockets.com/insights/locations?validated_address_search%5Baddress%5D=${this.property.address}+++&validated_address_search%5Bstructure_type%5D=&validated_address_search%5Bbeds%5D=${this.property.bedrooms}&validated_address_search%5Bbaths%5D=${this.property.bathrooms}&adjust_details=true&commit=Adjust+details`,
+      // Rentometer
+      `https://www.rentometer.com/?address=${this.property.address}&bedrooms=${this.property.bedrooms}`
+    ]
+    element.onclick = async () => {
+      await this.dataApi.addProperty(this.property)
+      urls.forEach((url) => window.open(url, '_blank'))
+      return false
+    }
+    element.textContent = 'Analyze'
   }
 
   async renderPriceChanges() {
@@ -220,17 +251,13 @@ class HomeDetailsAnnotator {
   }
 
   async renderBPRentLink() {
-    const property = currentProperty()
-    if (!property) return
-    const link = `https://www.biggerpockets.com/insights/locations?validated_address_search%5Baddress%5D=${property.address}+++&validated_address_search%5Bstructure_type%5D=&validated_address_search%5Bbeds%5D=${property.bedrooms}&validated_address_search%5Bbaths%5D=${property.bathrooms}&adjust_details=true&commit=Adjust+details`
+    const link = `https://www.biggerpockets.com/insights/locations?validated_address_search%5Baddress%5D=${this.property.address}+++&validated_address_search%5Bstructure_type%5D=&validated_address_search%5Bbeds%5D=${this.property.bedrooms}&validated_address_search%5Bbaths%5D=${this.property.bathrooms}&adjust_details=true&commit=Adjust+details`
 
     this.addLink('BP Rent', link)
   }
 
   async renderRentometerLink() {
-    const property = currentProperty()
-    if (!property) return
-    const link = `https://www.rentometer.com/?address=${property.address}&bedrooms=${property.bedrooms}`
+    const link = `https://www.rentometer.com/?address=${this.property.address}&bedrooms=${this.property.bedrooms}`
 
     this.addLink('Rentometer', link)
   }
@@ -246,12 +273,9 @@ class HomeDetailsAnnotator {
     el.innerText = text
     el.style.cssText =
       'border: 1px solid; border-radius: 5px; padding: 6px 10px; margin-left: 15px;'
+    const targetElement = document.querySelector('#links-container')
+    targetElement.append(el)
 
-    const summaryContainer = document.querySelector('.summary-container')
-    const targetElement = summaryContainer.querySelector(
-      '[data-renderstrat="inline"]'
-    )
-    targetElement.insertAdjacentElement('afterend', el)
     return el
   }
 
@@ -264,22 +288,26 @@ class HomeDetailsAnnotator {
     this.getChipsContainer().appendChild(el)
   }
 
-  addChipsContainer() {
-    const id = 'chips-container'
+  addContainer(id) {
     if (document.querySelector('#' + id)) return
 
     const el = document.createElement('div')
     el.setAttribute('id', id)
-    el.style.cssText = 'display: flex; flex-wrap: wrap; margin-top: 5px;'
+    el.style.cssText = 'display: flex; flex-wrap: wrap; margin-bottom: 10px;'
     const summaryContainer = document.querySelector('.summary-container')
     const targetElement = summaryContainer.querySelector(
       '[data-renderstrat="inline"]'
     )
     targetElement.insertAdjacentElement('afterend', el)
+    return el
   }
 
   getChipsContainer() {
     return document.querySelector('#chips-container')
+  }
+
+  getLinksContainer() {
+    return document.querySelector('#links-container')
   }
 
   /**
