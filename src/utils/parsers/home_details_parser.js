@@ -1,6 +1,6 @@
 const { PROPERTY_ATTRIBTUES } = require('../constants.js')
 const { Property } = require('../../models/property.js')
-const { matchedText, matchedTexts } = require('../helpers.js')
+const { matchedText, matchedTexts, serializeAddress } = require('../helpers.js')
 
 class HomeDetailsParser {
   static parse() {
@@ -19,7 +19,9 @@ class HomeDetailsParser {
   get property() {}
 
   get address() {
-    return document.querySelector('.summary-container h1').innerText
+    return serializeAddress(
+      document.querySelector('.summary-container h1').innerText
+    )
   }
 
   get zipcode() {

@@ -91,6 +91,10 @@ function findElement(selector, pattern) {
   return null
 }
 
+function serializeAddress(address) {
+  return address.replace(/\u00A0/g, ' ').replace(/\s/g, ' ')
+}
+
 async function findElementUntil(selector, pattern, duration = 0) {
   const maxIterations = duration > 0 ? Math.ceil(duration / 300) : Infinity
   let searchCount = 0
@@ -129,5 +133,6 @@ module.exports = {
   matchedTexts,
   findElement,
   findElementUntil,
+  serializeAddress,
   doAfter
 }

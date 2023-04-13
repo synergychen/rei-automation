@@ -3,6 +3,7 @@ const { Renderer } = require('../renderer.js')
 const { COLORS } = require('../constants.js')
 const { rentToPrice, toPercent, findElementUntil } = require('../helpers.js')
 const { currentProperty, savedProperty } = require('../session.js')
+const { PropertyAnalyzer } = require('../analyzers/property_analyzer.js')
 
 class HomeDetailsAnnotator {
   constructor() {
@@ -126,15 +127,8 @@ class HomeDetailsAnnotator {
   renderAnalyzeLink() {
     const element = this.addLink('Analyze')
     element.href = '#'
-    const urls = [
-      // BP link
-      `https://www.biggerpockets.com/insights/locations?validated_address_search%5Baddress%5D=${this.property.address}+++&validated_address_search%5Bstructure_type%5D=&validated_address_search%5Bbeds%5D=${this.property.bedrooms}&validated_address_search%5Bbaths%5D=${this.property.bathrooms}&adjust_details=true&commit=Adjust+details`,
-      // Rentometer
-      `https://www.rentometer.com/?address=${this.property.address}&bedrooms=${this.property.bedrooms}`
-    ]
     element.onclick = async () => {
-      await this.dataApi.addProperty(this.property)
-      urls.forEach((url) => window.open(url, '_blank'))
+      await PropertyAnalyzer.analyze()
       return false
     }
     element.textContent = 'Analyze'

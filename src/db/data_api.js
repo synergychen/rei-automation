@@ -1,3 +1,5 @@
+const { serializeAddress } = require('../utils/helpers.js')
+
 class DataAPI {
   static BASE_URL = 'https://us-central1-rei-automation.cloudfunctions.net/api'
   static SECURITY_TOKEN
@@ -27,25 +29,27 @@ class DataAPI {
   }
 
   async hasProperty(address) {
-    address = this.normalizeAddress(address)
+    address = serializeAddress(address)
     return !!(await this.findProperty(address))
   }
 
   async findProperty(address) {
-    address = this.normalizeAddress(address)
+    address = serializeAddress(address)
     return await this.getRequest(`/properties/${address}`)
   }
 
   async addProperty(property) {
+    property.address = serializeAddress(property.address)
     return await this.postRequest('/properties', property)
   }
 
   async updateProperty(property) {
+    property.address = serializeAddress(property.address)
     return await this.updateRequest(`/properties/${property.address}`, property)
   }
 
   async removeProperty(address) {
-    address = this.normalizeAddress(address)
+    address = serializeAddress(address)
     return await this.deleteRequest(`/properties/${address}`)
   }
 
@@ -57,24 +61,24 @@ class DataAPI {
   }
 
   async hasRent(address) {
-    address = this.normalizeAddress(address)
+    address = serializeAddress(address)
     return !!(await this.findRent(address))
   }
 
   async findRents(address) {
-    address = this.normalizeAddress(address)
+    address = serializeAddress(address)
     const rent = await this.findRent(address)
     if (!rent) return null
     return rent.rents
   }
 
   async findRent(address) {
-    address = this.normalizeAddress(address)
+    address = serializeAddress(address)
     return await this.getRequest(`/rents/${address}`)
   }
 
   async addRent(rent) {
-    const address = this.normalizeAddress(rent.address || rent.zipcode)
+    const address = serializeAddress(rent.address || rent.zipcode)
     const rents = await this.findRents(address)
     if (rents.length > 0) {
       const index = rents.findIndex((e) => e.source === rent.source)
@@ -91,8 +95,13 @@ class DataAPI {
     }
   }
 
+  async addEmptyRent(address) {
+    address = serializeAddress(address)
+    return await this.postRequest('/rents', { address, rents: [] })
+  }
+
   async updateRent(rent) {
-    const address = this.normalizeAddress(rent.address || rent.zipcode)
+    const address = serializeAddress(rent.address || rent.zipcode)
     const rents = await this.findRents(address)
     if (rents.length > 0) {
       const index = rents.findIndex((e) => e.source === rent.source)
@@ -113,7 +122,7 @@ class DataAPI {
   }
 
   async removeRent(address) {
-    address = this.normalizeAddress(address)
+    address = serializeAddress(address)
     return await this.deleteRequest(`/rents/${address}`)
   }
 
@@ -125,17 +134,17 @@ class DataAPI {
   }
 
   async isDeal(address) {
-    address = this.normalizeAddress(address)
+    address = serializeAddress(address)
     return !!(await this.getRequest(`/deals/${address}`))
   }
 
   async addDeal(address) {
-    address = this.normalizeAddress(address)
+    address = serializeAddress(address)
     return await this.postRequest('/deals', { address })
   }
 
   async removeDeal(address) {
-    address = this.normalizeAddress(address)
+    address = serializeAddress(address)
     return await this.deleteRequest(`/deals/${address}`)
   }
 
@@ -147,17 +156,17 @@ class DataAPI {
   }
 
   async isInterestedIn(address) {
-    address = this.normalizeAddress(address)
+    address = serializeAddress(address)
     return !!(await this.getRequest(`/interested/${address}`))
   }
 
   async addInterested(address) {
-    address = this.normalizeAddress(address)
+    address = serializeAddress(address)
     return await this.postRequest('/interested', { address })
   }
 
   async removeInterested(address) {
-    address = this.normalizeAddress(address)
+    address = serializeAddress(address)
     return await this.deleteRequest(`/interested/${address}`)
   }
 
@@ -234,10 +243,6 @@ class DataAPI {
       .catch((error) => {
         console.error('There was an error!', error)
       })
-  }
-
-  normalizeAddress(address) {
-    return address.replace(/\u00A0/g, ' ').replace(/\s/, ' ')
   }
 }
 

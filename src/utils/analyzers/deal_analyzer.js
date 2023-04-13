@@ -1,5 +1,5 @@
-const { DataAPI } = require('../db/data_api.js')
-const { Deal } = require('../models/deal.js')
+const { DataAPI } = require('../../db/data_api.js')
+const { Deal } = require('../../models/deal.js')
 
 class DealAnalyzer {
   static async goodDeals(percentThreshold = 0.7) {
