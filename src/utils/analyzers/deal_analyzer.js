@@ -7,7 +7,7 @@ class DealAnalyzer {
     const properties = await dataApi.properties()
     const filteredProperties = await Promise.all(
       properties.map(async (property) => {
-        const rents = await dataApi.findRents(property.address)
+        const rents = property.rents
         const deal = new Deal({
           property,
           rents,
@@ -23,7 +23,7 @@ class DealAnalyzer {
     const dataApi = new DataAPI()
     const property = await dataApi.findProperty(address)
     if (!property) return
-    const rents = await dataApi.findRents(property.address)
+    const rents = property.rents
     const deal = new Deal({
       property,
       rents,

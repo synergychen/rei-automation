@@ -12,7 +12,9 @@ const PROPERTY_ATTRIBTUES = [
   'daysOnMarket',
   'propertyTaxes',
   'schoolScores',
-  'priceHistory'
+  'priceHistory',
+  'rents',
+  'status'
 ]
 
 const COLORS = {
@@ -26,4 +28,22 @@ const COLORS = {
   lightYellow: '#FFE57F'
 }
 
-module.exports = { PROPERTY_ATTRIBTUES, COLORS }
+/**
+ * Property status
+ * - DEFAULT: no status
+ * - DEAL: is a deal, potential to be interested
+ * - NOT_A_DEAL: is not a deal
+ * - INTERESTED: potential to an offer
+ * - NOT_INTERESTED: skip
+ * - OFFER: potential offer
+ */
+const STATUS = {
+  default: 'DEFAULT',
+  deal: 'DEAL',
+  notADeal: 'NOT_A_DEAL',
+  interested: 'INTERESTED',
+  notInterested: 'NOT_INTERESTED',
+  offer: 'OFFER'
+}
+
+module.exports = { PROPERTY_ATTRIBTUES, COLORS, STATUS }

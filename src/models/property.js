@@ -1,30 +1,19 @@
-const { PROPERTY_ATTRIBTUES } = require('../utils/constants.js')
+const { PROPERTY_ATTRIBTUES, STATUS } = require('../utils/constants.js')
 
 class Property {
   static TWO_BEDS_MEDIAN_SIZE = 1300
   static THREE_BEDS_MEDIAN_SIZE = 1600
   static FOUR_BEDS_MEDIAN_SIZE = 1900
 
-  constructor({
-    address = null,
-    city = null,
-    state = null,
-    zipcode = null,
-    homeType = null,
-    price = null,
-    bedrooms = null,
-    bathrooms = null,
-    yearBuilt = null,
-    sqft = null,
-    daysOnMarket = null,
-    propertyTaxes = null,
-    schoolScores = [],
-    priceHistory = []
-  } = {}) {
+  constructor({ ...props }) {
     // Set variables
     for (const variable of PROPERTY_ATTRIBTUES) {
-      this[variable] = arguments[0][variable]
+      this[variable] = props[variable]
     }
+    this.schoolScores ||= []
+    this.priceHistory ||= []
+    this.rents ||= []
+    this.status ||= STATUS.default
 
     this.update()
   }
@@ -115,6 +104,34 @@ class Property {
     return parseFloat(total.toFixed(2))
   }
 
+  get isDeal() {
+    return this.status === STATUS.deal
+  }
+
+  get isInterested() {
+    return this.status === STATUS.isInterested
+  }
+
+  setDeal() {
+    this.status = STATUS.deal
+  }
+
+  setNotADeal() {
+    this.status = STATUS.notADeal
+  }
+
+  setInterested() {
+    this.status = STATUS.interested
+  }
+
+  setNotInterested() {
+    this.status = STATUS.notInterested
+  }
+
+  setOffer() {
+    this.status = STATUS.offer
+  }
+
   update() {
     const { city, state, zipcode } = this.parseAddress()
     this.city = city
@@ -135,6 +152,17 @@ class Property {
     } catch (error) {
       console.log(error)
       return {}
+    }
+  }
+
+  updateRent(rent) {
+    const index = this.rents.findIndex((e) => e.source === rent.source)
+    if (index !== -1) {
+      // Update when source found
+      this.rents[index] = rent
+    } else {
+      // Append when source not found
+      this.rents.push(rent)
     }
   }
 }

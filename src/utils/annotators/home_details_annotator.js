@@ -63,7 +63,7 @@ class HomeDetailsAnnotator {
 
   async renderHomeSummary() {
     const property = currentProperty()
-    const rents = (await this.dataApi.findRents(property.address)) || []
+    const rents = property.rents
     if (property && rents.length > 0) {
       const obj = {
         Year: property.yearBuilt,

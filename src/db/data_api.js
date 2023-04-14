@@ -1,4 +1,5 @@
 const { serializeAddress } = require('../utils/helpers.js')
+const { Property } = require('../models/property.js')
 
 class DataAPI {
   static BASE_URL = 'https://us-central1-rei-automation.cloudfunctions.net/api'
@@ -25,17 +26,16 @@ class DataAPI {
   // --- Properties ---
   // ------------------
   async properties() {
-    return await this.getRequest('/properties')
+    return (await this.getRequest('/properties')).map((e) => new Property(e))
   }
 
   async hasProperty(address) {
-    address = serializeAddress(address)
     return !!(await this.findProperty(address))
   }
 
   async findProperty(address) {
     address = serializeAddress(address)
-    return await this.getRequest(`/properties/${address}`)
+    return new Property(await this.getRequest(`/properties/${address}`))
   }
 
   async addProperty(property) {
@@ -56,118 +56,58 @@ class DataAPI {
   // -------------
   // --- Rents ---
   // -------------
-  async rents() {
-    return await this.getRequest('/rents')
-  }
-
-  async hasRent(address) {
-    address = serializeAddress(address)
-    return !!(await this.findRent(address))
-  }
-
-  async findRents(address) {
-    address = serializeAddress(address)
-    const rent = await this.findRent(address)
-    if (!rent) return null
-    return rent.rents
-  }
-
-  async findRent(address) {
-    address = serializeAddress(address)
-    return await this.getRequest(`/rents/${address}`)
-  }
-
-  async addRent(rent) {
-    const address = serializeAddress(rent.address || rent.zipcode)
-    const rents = await this.findRents(address)
-    if (rents.length > 0) {
-      const index = rents.findIndex((e) => e.source === rent.source)
-      if (index !== -1) {
-        // Update when source found
-        rents[index] = rent
-      } else {
-        // Append when source not found
-        rents.push(rent)
-      }
-      return await this.postRequest('/rents', { address, rents })
-    } else {
-      return await this.postRequest('/rents', { address, rents: [rent] })
-    }
-  }
-
-  async addEmptyRent(address) {
-    address = serializeAddress(address)
-    return await this.postRequest('/rents', { address, rents: [] })
-  }
-
   async updateRent(rent) {
-    const address = serializeAddress(rent.address || rent.zipcode)
-    const rents = await this.findRents(address)
-    if (rents.length > 0) {
-      const index = rents.findIndex((e) => e.source === rent.source)
-      if (index !== -1) {
-        // Update when source found
-        rents[index] = rent
-      } else {
-        // Append when source not found
-        rents.push(rent)
-      }
-      return await this.updateRequest(`/rents/${address}`, { address, rents })
-    } else {
-      return await this.updateRequest(`/rents/${address}`, {
-        address,
-        rents: [rent]
-      })
-    }
-  }
-
-  async removeRent(address) {
-    address = serializeAddress(address)
-    return await this.deleteRequest(`/rents/${address}`)
+    const property = await this.findProperty(rent.address)
+    if (!property) return
+    property.updateRent(rent)
+    return await this.updateProperty(property)
   }
 
   // -------------
   // --- Deals ---
   // -------------
   async deals() {
-    return await this.getRequest('/deals')
+    // TODO
   }
 
   async isDeal(address) {
-    address = serializeAddress(address)
-    return !!(await this.getRequest(`/deals/${address}`))
+    const property = await this.findProperty(address)
+    return property && property.isDeal
   }
 
-  async addDeal(address) {
-    address = serializeAddress(address)
-    return await this.postRequest('/deals', { address })
+  async setDeal(address) {
+    return await this.updatePropertyStatus(address, STATUS.deal)
   }
 
-  async removeDeal(address) {
-    address = serializeAddress(address)
-    return await this.deleteRequest(`/deals/${address}`)
+  async setNotADeal(address) {
+    return await this.updatePropertyStatus(address, STATUS.notADeal)
   }
 
   // ------------------
   // --- Interested ---
   // ------------------
   async interested() {
-    return await this.getRequest('/interested')
+    // TODO
   }
 
   async isInterestedIn(address) {
-    address = serializeAddress(address)
-    return !!(await this.getRequest(`/interested/${address}`))
+    const property = await this.findProperty(address)
+    return property && property.is.interested
   }
 
-  async addInterested(address) {
-    address = serializeAddress(address)
-    return await this.postRequest('/interested', { address })
+  async setInterested(address) {
+    return await this.updatePropertyStatus(address, STATUS.interested)
   }
 
-  async removeInterested(address) {
-    address = serializeAddress(address)
-    return await this.deleteRequest(`/interested/${address}`)
+  async setNotInterested(address) {
+    return await this.updatePropertyStatus(address, STATUS.notInterested)
+  }
+
+  async updatePropertyStatus(address, status) {
+    const property = await this.findProperty(address)
+    if (!property) return
+    property.status = status
+    return await this.updateProperty(property)
   }
 
   getRequest(url) {

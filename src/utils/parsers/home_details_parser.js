@@ -70,7 +70,7 @@ class HomeDetailsParser {
   get daysOnMarket() {
     const matched = matchedText(
       '.ds-data-view-list',
-      /([\d|,]+) days on zillow/i
+      /([\d|,]+) days? on zillow/i
     )
     return matched ? this.parseValue(matched[1]) : -1
   }
