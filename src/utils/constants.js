@@ -14,7 +14,8 @@ const PROPERTY_ATTRIBTUES = [
   'schoolScores',
   'priceHistory',
   'rents',
-  'status'
+  'status',
+  'updatedAt'
 ]
 
 const COLORS = {

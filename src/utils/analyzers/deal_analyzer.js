@@ -18,19 +18,6 @@ class DealAnalyzer {
     )
     return filteredProperties.filter((property) => property !== null)
   }
-
-  static async isGoodDeal(address, percentThreshold = 0.7) {
-    const dataApi = new DataAPI()
-    const property = await dataApi.findProperty(address)
-    if (!property) return
-    const rents = property.rents
-    const deal = new Deal({
-      property,
-      rents,
-      percentThreshold
-    })
-    return deal.isGood()
-  }
 }
 
 module.exports = { DealAnalyzer }

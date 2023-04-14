@@ -4,13 +4,10 @@ class PropertyAnalyzer {
   static async analyze() {
     const dataApi = new DataAPI()
     // Save property if not analyzed before
-    const property = currentProperty()
-    const propertySaved = await savedProperty()
-    if (property.valid && !propertySaved) {
+    const property = await currentProperty()
+    if (property.valid) {
       await dataApi.addProperty(property)
       console.log('Property saved')
-      await dataApi.addEmptyRent(property.address)
-      console.log('Empty rent entry created')
     }
     // Analyze rent on Rentometer and BP rent calculator
     const urls = [

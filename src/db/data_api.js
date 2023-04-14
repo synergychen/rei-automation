@@ -35,7 +35,8 @@ class DataAPI {
 
   async findProperty(address) {
     address = serializeAddress(address)
-    return new Property(await this.getRequest(`/properties/${address}`))
+    const property = await this.getRequest(`/properties/${address}`)
+    return property && new Property(property)
   }
 
   async addProperty(property) {
@@ -67,7 +68,7 @@ class DataAPI {
   // --- Deals ---
   // -------------
   async deals() {
-    // TODO
+    return (await this.getRequest('/deals'))
   }
 
   async isDeal(address) {
@@ -87,12 +88,12 @@ class DataAPI {
   // --- Interested ---
   // ------------------
   async interested() {
-    // TODO
+    return (await this.getRequest('/interested'))
   }
 
   async isInterestedIn(address) {
     const property = await this.findProperty(address)
-    return property && property.is.interested
+    return property && property.isInterested
   }
 
   async setInterested(address) {

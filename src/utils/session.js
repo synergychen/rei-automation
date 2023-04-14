@@ -1,17 +1,18 @@
 const { DataAPI } = require('../db/data_api.js')
+const { Property } = require('../models/property.js')
 
-function currentProperty() {
-  const property = HomeDetailsParser.parse()
-  return property.address && property.price && property.price > 0
-    ? property
-    : null
+async function currentProperty() {
+  const property = HomeDetailsParser.parse() || new Property()
+  const propertySaved = (await savedProperty()) || new Property()
+  property.rents = propertySaved.rents
+  property.status = propertySaved.status
+  return property
 }
 
 async function savedProperty() {
   const dataApi = new DataAPI()
   const property = HomeDetailsParser.parse()
-  const propertySaved = await dataApi.findProperty(property.address)
-  return propertySaved && new Property(propertySaved)
+  return await dataApi.findProperty(property.address)
 }
 
 module.exports = { currentProperty, savedProperty }

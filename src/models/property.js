@@ -5,11 +5,12 @@ class Property {
   static THREE_BEDS_MEDIAN_SIZE = 1600
   static FOUR_BEDS_MEDIAN_SIZE = 1900
 
-  constructor({ ...props }) {
+  constructor(props = {}) {
     // Set variables
     for (const variable of PROPERTY_ATTRIBTUES) {
-      this[variable] = props[variable]
+      this[variable] = props[variable] ?? null
     }
+
     this.schoolScores ||= []
     this.priceHistory ||= []
     this.rents ||= []
@@ -20,6 +21,7 @@ class Property {
 
   get valid() {
     return (
+      this.address &&
       this.address.length > 5 &&
       this.bedrooms > 0 &&
       this.price > 0 &&
@@ -104,6 +106,17 @@ class Property {
     return parseFloat(total.toFixed(2))
   }
 
+  /**
+   * Status
+   */
+  get toBeAnalyzed() {
+    return this.status === STATUS.default
+  }
+
+  get isAnalyzed() {
+    return this.status !== STATUS.default
+  }
+
   get isDeal() {
     return this.status === STATUS.deal
   }
@@ -132,11 +145,50 @@ class Property {
     this.status = STATUS.offer
   }
 
+  /**
+   * Deal
+   */
+  getDeal(percentThreshold = 0.7) {
+    const deal = new Deal({
+      property: this,
+      rents: this.rents,
+      percentThreshold
+    })
+    return deal
+  }
+
   update() {
+    // Update city, state, zipcode
     const { city, state, zipcode } = this.parseAddress()
     this.city = city
     this.state = state
     this.zipcode = this.zipcode || zipcode
+    // Update status
+    const deal = this.getDeal()
+    if (this.valid && this.toBeAnalyzed && deal.isReady()) {
+      if (deal.isGood()) {
+        this.setDeal()
+      } else {
+        this.setNotADeal()
+      }
+    }
+    // Timestamp
+    this.updatedAt = new Date()
+      .toISOString()
+      .replace(/T/, ' ')
+      .replace(/\..+/, '')
+  }
+
+  updateRent(rent) {
+    const index = this.rents.findIndex((e) => e.source === rent.source)
+    if (index !== -1) {
+      // Update when source found
+      this.rents[index] = rent
+    } else {
+      // Append when source not found
+      this.rents.push(rent)
+    }
+    this.update()
   }
 
   parseAddress() {
@@ -152,17 +204,6 @@ class Property {
     } catch (error) {
       console.log(error)
       return {}
-    }
-  }
-
-  updateRent(rent) {
-    const index = this.rents.findIndex((e) => e.source === rent.source)
-    if (index !== -1) {
-      // Update when source found
-      this.rents[index] = rent
-    } else {
-      // Append when source not found
-      this.rents.push(rent)
     }
   }
 }

@@ -1,4 +1,3 @@
-const { Property } = require('./property.js')
 const { Rent } = require('./rent.js')
 
 class Deal {
@@ -9,9 +8,13 @@ class Deal {
     rents = [],
     percentThreshold = Deal.RENT_TO_PRICE_PERCENT_THRESHOLD
   }) {
-    this.property = new Property(property)
+    this.property = property
     this.rents = rents.map(rent => new Rent(rent))
     this.percentThreshold = percentThreshold
+  }
+
+  isReady() {
+    return this.property.valid && this.rents.length > 1
   }
 
   isGood() {

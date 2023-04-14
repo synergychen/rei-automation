@@ -1,23 +1,25 @@
 const { DataAPI } = require('../../db/data_api.js')
 const { Renderer } = require('../renderer.js')
-const { COLORS } = require('../constants.js')
+const { COLORS, STATUS } = require('../constants.js')
 const { rentToPrice, toPercent, findElementUntil } = require('../helpers.js')
-const { currentProperty, savedProperty } = require('../session.js')
+const { currentProperty } = require('../session.js')
 const { PropertyAnalyzer } = require('../analyzers/property_analyzer.js')
 
 class HomeDetailsAnnotator {
   constructor() {
     this.dataApi = new DataAPI()
-    this.property = currentProperty()
+    this.property = null
   }
 
   static async annotate() {
-    if (!currentProperty()) {
+    const annotator = new HomeDetailsAnnotator()
+    annotator.property = await currentProperty()
+
+    if (!annotator.property) {
       console.log('Current property not exists')
       return
     }
 
-    const annotator = new HomeDetailsAnnotator()
     await annotator.annotate()
   }
 
@@ -26,18 +28,24 @@ class HomeDetailsAnnotator {
     this.annotateAddress()
     // Add summary detail
     await this.renderHomeSummary()
+    // Render status select
+    this.renderSelects()
     // Render links
     await this.renderLinks()
     // Render chips
     await this.renderChips()
   }
 
+  renderSelects() {
+    this.addContainer('selects-container')
+    if (this.property.isAnalyzed) {
+      this.renderStatusSelect()
+    }
+  }
+
   async renderLinks() {
     this.addContainer('links-container')
-    if (await savedProperty()) {
-      // Add "Interested" link
-      await this.renderInterestedLink()
-    } else {
+    if (!this.property.isAnalyzed) {
       // Add "Analyze" link
       this.renderAnalyzeLink()
     }
@@ -62,17 +70,16 @@ class HomeDetailsAnnotator {
   }
 
   async renderHomeSummary() {
-    const property = currentProperty()
-    const rents = property.rents
-    if (property && rents.length > 0) {
+    const rents = this.property.rents
+    if (this.property && rents.length > 0) {
       const obj = {
-        Year: property.yearBuilt,
-        'Days on Market': property.daysOnMarket
+        Year: this.property.yearBuilt,
+        'Days on Market': this.property.daysOnMarket
       }
       rents.forEach((rent) => {
         obj['Rent / ' + rent.source] = rent.median
         obj['Ratio / ' + rent.source] = toPercent(
-          rentToPrice(rent.median, property.price)
+          rentToPrice(rent.median, this.property.price)
         )
       })
       Renderer.render(obj)
@@ -81,47 +88,29 @@ class HomeDetailsAnnotator {
     }
   }
 
-  async renderInterestedLink() {
-    const interestedButtonId = 'interested-button'
-    if (document.querySelector('#' + interestedButtonId)) return
+  renderStatusSelect() {
+    const select = document.createElement('select')
 
-    const interestedButton = document.createElement('a')
-    interestedButton.setAttribute('id', interestedButtonId)
-
-    const markAsInterested = async () => {
-      interestedButton.innerText = 'Interested'
-      interestedButton.style.cssText = `background-color: ${COLORS.green}; border-radius: 5px; margin-left: 15px; border: none; padding: 5px 10px; text-decoration: none; color: inherit;`
-      await this.dataApi.addInterested(this.getAddress())
-      isInterested = true
-    }
-
-    const markAsUninterested = async () => {
-      interestedButton.innerText = 'Interested?'
-      interestedButton.style.cssText =
-        'background-color: white; border-radius: 5px; margin-left: 15px; border: 1px solid; padding: 5px 10px; text-decoration: none; color: inherit;'
-      await this.dataApi.removeInterested(this.getAddress())
-      isInterested = false
-    }
-
-    let isInterested = await this.dataApi.isInterestedIn(this.getAddress())
-    const buttonLabel = isInterested ? 'Interested' : 'Interested?'
-    const buttonStyle = isInterested
-      ? `background-color: ${COLORS.green}; border-radius: 5px; margin-left: 15px; border: 1px solid ${COLORS.green}; padding: 5px 10px; text-decoration: none; color: inherit;`
-      : 'background-color: white; border-radius: 5px; margin-left: 15px; border: 1px solid; padding: 5px 10px; text-decoration: none; color: inherit;'
-
-    interestedButton.innerText = buttonLabel
-    interestedButton.style.cssText = buttonStyle
-
-    interestedButton.addEventListener('click', async () => {
-      if (isInterested) {
-        await markAsUninterested()
-      } else {
-        await markAsInterested()
+    for (const status of Object.values(STATUS)) {
+      const option = document.createElement('option')
+      option.text = status
+      if (status === this.property.status) {
+        option.selected = true
+        if (status === STATUS.notADeal) {
+          select.disabled = true
+        }
       }
+      select.appendChild(option)
+    }
+
+    select.addEventListener('change', async (event) => {
+      this.property.status = event.target.value
+      await this.dataApi.updateProperty(this.property)
     })
 
-    const targetElement = document.querySelector('#links-container')
-    targetElement.append(interestedButton)
+    const targetElement = document.getElementById('selects-container')
+    select.style.cssText = `margin: 0 15px; border-radius: 5px; width: 150px; height: 35px;`
+    targetElement.appendChild(select)
   }
 
   renderAnalyzeLink() {
@@ -138,7 +127,7 @@ class HomeDetailsAnnotator {
     const chipClassName = 'price-change-chip'
     if (document.querySelector('.' + chipClassName)) return
 
-    const property = currentProperty()
+    const property = this.property
     if (property.priceIncreases.length > 0) {
       this.addChip(
         chipClassName,
@@ -161,7 +150,7 @@ class HomeDetailsAnnotator {
     const chipClassName = 'days-on-market-chip'
     if (document.querySelector('.' + chipClassName)) return
 
-    const property = currentProperty()
+    const property = this.property
     const step = 30
     const daysOnMarket =
       property.daysOnMarket > 0
@@ -190,7 +179,7 @@ class HomeDetailsAnnotator {
     const chipClassName = 'size-chip'
     if (document.querySelector('.' + chipClassName)) return
 
-    const property = currentProperty()
+    const property = this.property
     if (property.sqft < 0) return
 
     if (property.isLargeSize) {
@@ -206,7 +195,7 @@ class HomeDetailsAnnotator {
     const chipClassName = 'school-chip'
     if (document.querySelector('.' + chipClassName)) return
 
-    const property = currentProperty()
+    const property = this.property
     if (property.hasGoodSchool) {
       this.addChip(
         chipClassName,
