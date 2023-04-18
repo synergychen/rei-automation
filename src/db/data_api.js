@@ -1,5 +1,6 @@
 const { serializeAddress } = require('../utils/helpers.js')
 const { Property } = require('../models/property.js')
+const { Message } = require('../models/message.js')
 
 class DataAPI {
   static BASE_URL = 'https://us-central1-rei-automation.cloudfunctions.net/api'
@@ -68,7 +69,7 @@ class DataAPI {
   // --- Deals ---
   // -------------
   async deals() {
-    return (await this.getRequest('/deals'))
+    return await this.getRequest('/deals')
   }
 
   async isDeal(address) {
@@ -88,7 +89,7 @@ class DataAPI {
   // --- Interested ---
   // ------------------
   async interested() {
-    return (await this.getRequest('/interested'))
+    return await this.getRequest('/interested')
   }
 
   async isInterestedIn(address) {
@@ -104,6 +105,31 @@ class DataAPI {
     return await this.updatePropertyStatus(address, STATUS.notInterested)
   }
 
+  // ----------------------
+  // --- Email listings ---
+  // ----------------------
+  async emails(status = Message.TO_DO) {
+    const messages = await this.getRequest(`/messages?status=${status}`)
+    return messages.map((msg) => new Message(msg))
+  }
+
+  async markEmailAsRead(id) {
+    const message = await this.getRequest(`/messages/${id}`)
+    if (!message) return
+    message.status = Message.DONE
+    return await this.updateRequest(`/messages/${id}`, message)
+  }
+
+  // Add new message and mark as TO_DO
+  async syncEmails() {
+    const data = await this.getRequest(
+      'http://localhost:3000/messages?label=rei-agent',
+      true
+    )
+    const messages = data.map((msg) => new Message(msg))
+    return await this.postRequest(`/messages`, messages)
+  }
+
   async updatePropertyStatus(address, status) {
     const property = await this.findProperty(address)
     if (!property) return
@@ -111,8 +137,9 @@ class DataAPI {
     return await this.updateProperty(property)
   }
 
-  getRequest(url) {
-    return fetch(DataAPI.BASE_URL + url, {
+  getRequest(url, absoluteUrl = false) {
+    url = absoluteUrl ? url : DataAPI.BASE_URL + url
+    return fetch(url, {
       headers: {
         Authorization: 'Bearer ' + DataAPI.SECURITY_TOKEN
       }

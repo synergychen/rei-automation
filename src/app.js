@@ -2,6 +2,7 @@ const paths = [
   "src/app.js",
   "src/db/data_api.js",
   "src/models/deal.js",
+  "src/models/message.js",
   "src/models/property.js",
   "src/models/rent.js",
   "src/services/zillow.js",
