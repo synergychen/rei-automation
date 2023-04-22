@@ -121,6 +121,33 @@ async function doAfter(func, time) {
   return func()
 }
 
+// Log message to screen
+function logMessage(message) {
+  // get local time
+  const now = new Date()
+  const timeStr = now.toLocaleTimeString()
+
+  // format message with time prefix
+  const messageStr = `[${timeStr}] ${message}`
+
+  // check if banner element exists
+  let banner = document.getElementById('banner')
+  if (!banner) {
+    // create banner element if it doesn't exist
+    banner = document.createElement('div')
+    banner.id = 'banner'
+    banner.style.cssText =
+      'position: absolute; z-index: 1000000; background-color: white; padding: 10px;'
+    document.body.insertBefore(banner, document.body.firstChild)
+  }
+
+  // prepend message to banner element
+  const messageElem = document.createElement('div')
+  messageElem.innerText = messageStr
+  banner.insertBefore(messageElem, banner.firstChild)
+}
+
+
 module.exports = {
   rentToPrice,
   toDollar,
@@ -134,5 +161,6 @@ module.exports = {
   findElement,
   findElementUntil,
   serializeAddress,
-  doAfter
+  doAfter,
+  logMessage
 }

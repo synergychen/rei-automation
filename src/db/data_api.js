@@ -130,6 +130,9 @@ class DataAPI {
     return await this.postRequest(`/messages`, messages)
   }
 
+  // ---------------
+  // --- Helpers ---
+  // ---------------
   async updatePropertyStatus(address, status) {
     const property = await this.findProperty(address)
     if (!property) return

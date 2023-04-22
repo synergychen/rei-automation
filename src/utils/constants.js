@@ -4,6 +4,7 @@ const PROPERTY_ATTRIBTUES = [
   'state',
   'zipcode',
   'homeType',
+  'homeStatus',
   'price',
   'bedrooms',
   'bathrooms',
@@ -11,10 +12,13 @@ const PROPERTY_ATTRIBTUES = [
   'sqft',
   'daysOnMarket',
   'propertyTaxes',
+  'schools',
   'schoolScores',
   'priceHistory',
   'rents',
   'status',
+  'comps',
+  'nearbyHomes',
   'updatedAt'
 ]
 

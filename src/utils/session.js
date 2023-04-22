@@ -1,11 +1,19 @@
 const { DataAPI } = require('../db/data_api.js')
 const { Property } = require('../models/property.js')
+const { HomeDetailsAPI } = require('../services/home_details_api.js')
+const { HomeDetailsParser } = require('./parsers/home_details_parser.js')
 
 async function currentProperty() {
-  const property = HomeDetailsParser.parse() || new Property()
-  const propertySaved = (await savedProperty()) || new Property()
-  property.rents = propertySaved.rents
-  property.status = propertySaved.status
+  const address = HomeDetailsParser.parse().address
+  const [fetchedProperty, saved] = await Promise.all([
+    HomeDetailsAPI.fetch(address),
+    savedProperty()
+  ])
+  const property = fetchedProperty || new Property()
+  if (saved) {
+    property.rents = saved.rents
+    property.status = saved.status
+  }
   return property
 }
 
