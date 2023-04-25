@@ -49,7 +49,7 @@ class RentometerRentParser extends RentParser {
 
   get address() {
     if (this.useAddress()) {
-      return document
+      return this.target
         .querySelector('#address_unified_search_address')
         .value.replace(/, USA$/, '')
     }
@@ -58,7 +58,7 @@ class RentometerRentParser extends RentParser {
 
   get zipcode() {
     if (this.useZipcode()) {
-      const resultText = document
+      const resultText = this.target
         .querySelector('h3.result-address-header')
         .innerText.replace(/quickview/i, '')
         .trim()
@@ -103,22 +103,23 @@ class RentometerRentParser extends RentParser {
   }
 
   get count() {
-    const summary = document
+    const summary = this.target
       .querySelector('#active-results-container')
-      .innerText.replaceAll('\n', '')
+      .innerText.replace(/\n/g, ' ')
+      .replace(/\s+/g, ' ')
       .match(/Results based on (\d+), .* within (\d+) months/)
     return parseInt(summary[1])
   }
 
   useAddress() {
-    const selectedTab = document
+    const selectedTab = this.target
       .querySelector('.search-type-tab.active a')
       .innerText.trim()
     return !!selectedTab.match(/address/i)
   }
 
   useZipcode() {
-    const selectedTab = document
+    const selectedTab = this.target
       .querySelector('.search-type-tab.active a')
       .innerText.trim()
     return !!selectedTab.match(/zip code/i)

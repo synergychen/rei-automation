@@ -7,6 +7,7 @@ const paths = [
   "src/models/rent.js",
   "src/services/bigger_pockets_rent_api.js",
   "src/services/home_details_api.js",
+  "src/services/rentometer_api.js",
   "src/services/zillow.js",
   "src/utils/constants.js",
   "src/utils/helpers.js",

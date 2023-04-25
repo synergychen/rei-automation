@@ -5,6 +5,7 @@ class Property {
   static TWO_BEDS_MEDIAN_SIZE = 1300
   static THREE_BEDS_MEDIAN_SIZE = 1600
   static FOUR_BEDS_MEDIAN_SIZE = 1900
+  static FOR_SALE = 'FOR_SALE'
 
   constructor(props = {}) {
     // Set variables
@@ -13,7 +14,7 @@ class Property {
     }
 
     this.rents ||= []
-    this.rents = this.rents.map(rent => new Rent(rent))
+    this.rents = this.rents.map((rent) => new Rent(rent))
     this.schoolScores ||= []
     this.priceHistory ||= []
     this.status ||= STATUS.default
@@ -22,13 +23,14 @@ class Property {
   }
 
   get valid() {
-    return (
+    const validData =
       this.address &&
       this.address.length > 5 &&
       this.bedrooms > 0 &&
       this.price > 0 &&
       this.sqft > 0
-    )
+    const validStatus = (this.homeStatus ? this.homeStatus === Property.FOR_SALE : true)
+    return validData && validStatus
   }
 
   // Average house size for different bedrooms

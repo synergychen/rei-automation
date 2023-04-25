@@ -38,9 +38,7 @@ class HomeDetailsAnnotator {
 
   renderSelects() {
     this.addContainer('selects-container')
-    if (this.property.isAnalyzed) {
-      this.renderStatusSelect()
-    }
+    this.renderStatusSelect()
   }
 
   async renderLinks() {
