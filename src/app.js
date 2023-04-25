@@ -16,6 +16,7 @@ const paths = [
   "src/utils/analyzers/property_analyzer.js",
   "src/utils/annotators/home_details_annotator.js",
   "src/utils/annotators/map_annotator.js",
+  "src/utils/automator/bigger_pockets_rent_automator.js",
   "src/utils/automator/email_automator.js",
   "src/utils/automator/rentometer_automator.js",
   "src/utils/parsers/home_details_parser.js",

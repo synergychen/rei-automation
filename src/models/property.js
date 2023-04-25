@@ -1,4 +1,5 @@
 const { PROPERTY_ATTRIBTUES, STATUS } = require('../utils/constants.js')
+const { Rent } = require('./rent.js')
 
 class Property {
   static TWO_BEDS_MEDIAN_SIZE = 1300
@@ -11,9 +12,10 @@ class Property {
       this[variable] = props[variable] ?? null
     }
 
+    this.rents ||= []
+    this.rents = this.rents.map(rent => new Rent(rent))
     this.schoolScores ||= []
     this.priceHistory ||= []
-    this.rents ||= []
     this.status ||= STATUS.default
 
     this.update()
@@ -180,6 +182,7 @@ class Property {
   }
 
   updateRent(rent) {
+    rent = new Rent(rent)
     const index = this.rents.findIndex((e) => e.source === rent.source)
     if (index !== -1) {
       // Update when source found

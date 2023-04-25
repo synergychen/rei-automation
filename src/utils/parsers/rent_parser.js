@@ -183,7 +183,7 @@ class BiggerPocketsRentParser extends RentParser {
 
   get addressText() {
     const el = this.target.querySelector('.insights-result-title')
-    return el && el.innerText.replace(/\n/g, ' ')
+    return el && el.innerText.replace(/\n/g, ' ').trim()
   }
 }
 

@@ -31,6 +31,14 @@ class Rent {
     }
   }
 
+  get hasBiggerPockets() {
+    return this.source === Rent.BIGGER_POCKETS
+  }
+
+  get hasRentometer() {
+    return this.source === Rent.RENTOMETER
+  }
+
   setRentometer() {
     this.source = Rent.RENTOMETER
   }

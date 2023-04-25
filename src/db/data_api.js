@@ -1,4 +1,5 @@
 const { serializeAddress } = require('../utils/helpers.js')
+const { STATUS } = require('../utils/constants.js')
 const { Property } = require('../models/property.js')
 const { Message } = require('../models/message.js')
 
@@ -28,6 +29,20 @@ class DataAPI {
   // ------------------
   async properties() {
     return (await this.getRequest('/properties')).map((e) => new Property(e))
+  }
+
+  async propertiesWithoutBiggerPocketsRent() {
+    const properties = (
+      await this.getRequest(`/properties?status=${STATUS.default}`)
+    ).map((e) => new Property(e))
+    return properties.filter(p => !p.rents.find(rent => rent.hasBiggerPockets))
+  }
+
+  async propertiesWithoutRentometerRent() {
+    const properties = (
+      await this.getRequest(`/properties?status=${STATUS.default}`)
+    ).map((e) => new Property(e))
+    return properties.filter(p => !p.rents.find(rent => rent.hasRentometer))
   }
 
   async hasProperty(address) {
