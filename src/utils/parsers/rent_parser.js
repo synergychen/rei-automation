@@ -2,7 +2,8 @@ const { Rent } = require('../../models/rent.js')
 const { average, median, pct25th, pct75th } = require('../helpers.js')
 
 class RentParser {
-  constructor() {
+  constructor(target = document) {
+    this.target = target
     return new Rent({
       address: this.address,
       zipcode: this.zipcode,
@@ -16,7 +17,7 @@ class RentParser {
     })
   }
 
-  static parse() {}
+  static parse(target = document) {}
 
   get address() {}
 
@@ -40,8 +41,8 @@ class RentParser {
 }
 
 class RentometerRentParser extends RentParser {
-  static parse() {
-    const rent = new RentometerRentParser()
+  static parse(target = document) {
+    const rent = new RentometerRentParser(target)
     rent.setRentometer()
     return rent
   }
@@ -69,25 +70,25 @@ class RentometerRentParser extends RentParser {
 
   get bedrooms() {
     return parseInt(
-      document.querySelector('select#zip_unified_search_bed_style').value
+      this.target.querySelector('select#zip_unified_search_bed_style').value
     )
   }
 
   get average() {
     return this.parseValue(
-      document.querySelector("[title='Sample Mean']").innerText
+      this.target.querySelector("[title='Sample Mean']").innerText
     )
   }
 
   get median() {
     return this.parseValue(
-      document.querySelector("[title='Sample Median']").innerText
+      this.target.querySelector("[title='Sample Median']").innerText
     )
   }
 
   get pct25th() {
     return this.parseValue(
-      document.querySelector(
+      this.target.querySelector(
         "[title^='This is the estimated value of the 25th']"
       ).innerText
     )
@@ -95,7 +96,7 @@ class RentometerRentParser extends RentParser {
 
   get pct75th() {
     return this.parseValue(
-      document.querySelector(
+      this.target.querySelector(
         "[title^='This is the estimated value of the 75th']"
       ).innerText
     )
@@ -125,8 +126,8 @@ class RentometerRentParser extends RentParser {
 }
 
 class BiggerPocketsRentParser extends RentParser {
-  static parse() {
-    const rent = new BiggerPocketsRentParser()
+  static parse(target = document) {
+    const rent = new BiggerPocketsRentParser(target)
     rent.setBiggerPockets()
     return rent
   }
@@ -144,7 +145,9 @@ class BiggerPocketsRentParser extends RentParser {
   }
 
   get bedrooms() {
-    const el = document.querySelector('[name="validated_address_search[beds]"]')
+    const el = this.target.querySelector(
+      '[name="validated_address_search[beds]"]'
+    )
     return el && parseInt(el.value)
   }
 
@@ -169,7 +172,7 @@ class BiggerPocketsRentParser extends RentParser {
   }
 
   get rents() {
-    const el = document.querySelector(
+    const el = this.target.querySelector(
       '.insights-result-comparable-properties-list-content'
     )
     if (!el) return null
@@ -179,14 +182,14 @@ class BiggerPocketsRentParser extends RentParser {
   }
 
   get addressText() {
-    const el = document.querySelector('.insights-result-title')
+    const el = this.target.querySelector('.insights-result-title')
     return el && el.innerText.replace(/\n/g, ' ')
   }
 }
 
 class ZillowRentParser extends RentParser {
-  static parse() {
-    const rent = new ZillowRentParser()
+  static parse(target = document) {
+    const rent = new ZillowRentParser(target)
     rent.setZillow()
     return rent
   }

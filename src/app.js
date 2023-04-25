@@ -5,6 +5,7 @@ const paths = [
   "src/models/message.js",
   "src/models/property.js",
   "src/models/rent.js",
+  "src/services/bigger_pockets_rent_api.js",
   "src/services/home_details_api.js",
   "src/services/zillow.js",
   "src/utils/constants.js",
