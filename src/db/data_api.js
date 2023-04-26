@@ -70,6 +70,22 @@ class DataAPI {
     return await this.deleteRequest(`/properties/${address}`)
   }
 
+  async removeSold() {
+    const [sold, recentlySold, pending] = await Promise.all([
+      this.getRequest('/properties?homeStatus=SOLD'),
+      this.getRequest('/properties?homeStatus=RECENTLY_SOLD'),
+      this.getRequest('/properties?homeStatus=PENDING')
+    ])
+
+    const toDelete = [...sold, ...recentlySold, ...pending]
+    const addresses = toDelete.map(property => property.address)
+    return await Promise.all(
+      addresses.map(async (address) => {
+        await this.removeProperty(address)
+      })
+    )
+  }
+
   // -------------
   // --- Rents ---
   // -------------
