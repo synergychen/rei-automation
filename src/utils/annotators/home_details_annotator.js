@@ -1,7 +1,12 @@
 const { DataAPI } = require('../../db/data_api.js')
 const { Renderer } = require('../renderer.js')
 const { COLORS, STATUS } = require('../constants.js')
-const { rentToPrice, toPercent, findElementUntil } = require('../helpers.js')
+const {
+  rentToPrice,
+  toPercent,
+  findElementUntil,
+  encodeUrlParams
+} = require('../helpers.js')
 const { currentProperty } = require('../session.js')
 const { PropertyAnalyzer } = require('../analyzers/property_analyzer.js')
 
@@ -232,13 +237,21 @@ class HomeDetailsAnnotator {
   }
 
   async renderBPRentLink() {
-    const link = `https://www.biggerpockets.com/insights/locations?validated_address_search%5Baddress%5D=${this.property.address}+++&validated_address_search%5Bstructure_type%5D=&validated_address_search%5Bbeds%5D=${this.property.bedrooms}&validated_address_search%5Bbaths%5D=${this.property.bathrooms}&adjust_details=true&commit=Adjust+details`
+    const urlParams = encodeUrlParams({
+      fetch_rents: true,
+      addresses: [this.property.address]
+    })
+    const link = `https://www.biggerpockets.com/insights/property-searches/new?${urlParams}`
 
     this.addLink('BP Rent', link)
   }
 
   async renderRentometerLink() {
-    const link = `https://www.rentometer.com/?address=${this.property.address}&bedrooms=${this.property.bedrooms}`
+    const urlParams = encodeUrlParams({
+      fetch_rents: true,
+      addresses: [this.property.address]
+    })
+    const link = `https://www.rentometer.com/?${urlParams}`
 
     this.addLink('Rentometer', link)
   }

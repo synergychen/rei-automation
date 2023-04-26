@@ -5,17 +5,14 @@ const {
 } = require('../../services/bigger_pockets_rent_api.js')
 
 class BiggerPocketsRentAutomator {
-  constructor(properties = []) {
+  constructor(addresses = []) {
     this.dataApi = new DataAPI()
-    this.properties = properties
+    this.addresses = addresses
   }
 
   async start() {
     try {
-      const properties =
-        this.properties.length > 0
-          ? this.properties
-          : await this.dataApi.propertiesWithoutBiggerPocketsRent()
+      const properties = await this.fetchProperties(this.addresses)
       logMessage(`Found ${properties.length} properties without BP rents`)
       for (let i = 0; i < properties.length; i++) {
         const property = properties[i]
@@ -42,6 +39,15 @@ class BiggerPocketsRentAutomator {
       logMessage('Error')
       throw error
     }
+  }
+
+  async fetchProperties(addresses) {
+    if (addresses.length > 0) {
+      return await Promise.all(
+        addresses.map((address) => this.dataApi.findProperty(address))
+      )
+    }
+    return await this.dataApi.propertiesWithoutBiggerPocketsRent()
   }
 
   async pause(ms) {

@@ -95,6 +95,31 @@ function serializeAddress(address) {
   return address.replace(/\u00A0/g, ' ').replace(/\s/g, ' ')
 }
 
+function parseUrlParams(url) {
+  const searchParams = new URLSearchParams(url.split('?')[1])
+  const paramsObj = {}
+  for (const [key, value] of searchParams.entries()) {
+    try {
+      paramsObj[key] = JSON.parse(value)
+    } catch (e) {
+      paramsObj[key] = value
+    }
+  }
+  return paramsObj
+}
+
+function encodeUrlParams(paramsObj) {
+  const searchParams = new URLSearchParams()
+  for (const [key, value] of Object.entries(paramsObj)) {
+    if (Array.isArray(value) || typeof value === 'object') {
+      searchParams.append(key, JSON.stringify(value))
+    } else {
+      searchParams.append(key, value)
+    }
+  }
+  return searchParams.toString()
+}
+
 async function findElementUntil(selector, pattern, duration = 0) {
   const maxIterations = duration > 0 ? Math.ceil(duration / 300) : Infinity
   let searchCount = 0
@@ -147,7 +172,6 @@ function logMessage(message) {
   banner.insertBefore(messageElem, banner.firstChild)
 }
 
-
 module.exports = {
   rentToPrice,
   toDollar,
@@ -162,5 +186,7 @@ module.exports = {
   findElementUntil,
   serializeAddress,
   doAfter,
-  logMessage
+  logMessage,
+  parseUrlParams,
+  encodeUrlParams
 }

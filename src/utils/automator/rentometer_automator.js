@@ -3,17 +3,14 @@ const { DataAPI } = require('../../db/data_api.js')
 const { RentometerAPI } = require('../../services/rentometer_api.js')
 
 class RentometerAutomator {
-  constructor(properties = []) {
+  constructor(addresses = []) {
     this.dataApi = new DataAPI()
-    this.properties = properties
+    this.addresses = addresses
   }
 
   async start(authToken, recaptchaToken) {
     try {
-      const properties =
-        this.properties.length > 0
-          ? this.properties
-          : await this.dataApi.propertiesWithoutRentometerRent()
+      const properties = await this.fetchProperties(this.addresses)
       logMessage(
         `Found ${properties.length} properties without Rentometer rents`
       )
@@ -44,6 +41,15 @@ class RentometerAutomator {
       logMessage('Error')
       throw error
     }
+  }
+
+  async fetchProperties(addresses) {
+    if (addresses.length > 0) {
+      return await Promise.all(
+        addresses.map((address) => this.dataApi.findProperty(address))
+      )
+    }
+    return await this.dataApi.propertiesWithoutRentometerRent()
   }
 
   async pause(ms) {
