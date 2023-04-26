@@ -5,13 +5,17 @@ const {
 } = require('../../services/bigger_pockets_rent_api.js')
 
 class BiggerPocketsRentAutomator {
-  constructor() {
+  constructor(properties = []) {
     this.dataApi = new DataAPI()
+    this.properties = properties
   }
 
   async start() {
     try {
-      const properties = await this.dataApi.propertiesWithoutBiggerPocketsRent()
+      const properties =
+        this.properties.length > 0
+          ? this.properties
+          : await this.dataApi.propertiesWithoutBiggerPocketsRent()
       logMessage(`Found ${properties.length} properties without BP rents`)
       for (let i = 0; i < properties.length; i++) {
         const property = properties[i]
