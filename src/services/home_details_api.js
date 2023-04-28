@@ -2,9 +2,19 @@ const { Property } = require('../models/property.js')
 
 class HomeDetailsAPI {
   static async fetchAll(addresses) {
+    const api = new HomeDetailsAPI()
+    return await api.fetchAll(addresses)
+  }
+
+  static async fetch(address) {
+    const api = new HomeDetailsAPI()
+    return await api.fetch(address)
+  }
+
+  async fetchAll(addresses) {
     const results = {}
     for (const address of addresses) {
-      const result = await HomeDetailsAPI.fetch(address)
+      const result = await this.fetch(address)
       if (result) {
         results[result.address] = result
       }
@@ -12,7 +22,7 @@ class HomeDetailsAPI {
     return results
   }
 
-  static async fetch(address) {
+  async fetch(address) {
     const encodedAddress = encodeURIComponent(address)
     const url = `https://www.zillow.com/homes/${encodedAddress}`
 
@@ -40,24 +50,55 @@ class HomeDetailsAPI {
       const html = await response.text()
       const parser = new DOMParser()
       const htmlDoc = parser.parseFromString(html, 'text/html')
-      const data = JSON.parse(
-        htmlDoc.body.querySelector('#__NEXT_DATA__').innerText
-      )
-      const pageProps = data.props.pageProps
-      const propertyDataContainer = JSON.parse(
-        pageProps.gdpClientCache || pageProps.initialData.building
-      )
-      const propertyData =
-        propertyDataContainer[Object.keys(propertyDataContainer)[0]].property
-
-      return HomeDetailsAPI.parse(propertyData)
+      const propertyData = this.parsePropertyData(htmlDoc)
+      return this.parse(propertyData)
     } catch (error) {
-      console.log(error)
+      console.error(error)
       return null
     }
   }
 
-  static parse(data) {
+  parsePropertyData(htmlDoc) {
+    const json = JSON.parse(
+      htmlDoc.body.querySelector('script#hdpApolloPreloadedData').innerText
+    )
+    return this.findLargestObjectByKey(json, 'property')
+  }
+
+  findLargestObjectByKey(obj, targetKey) {
+    let largestSize = -1
+    let largestObject = null
+    for (let key in obj) {
+      if (typeof obj[key] === 'string') {
+        let parsedValue
+        try {
+          parsedValue = JSON.parse(obj[key])
+        } catch (e) {
+          // ignore the error and continue iterating
+        }
+        if (parsedValue) {
+          obj[key] = parsedValue
+        }
+      }
+      if (typeof obj[key] === 'object' && obj[key] !== null) {
+        if (key === targetKey && Object.keys(obj[key]).length > largestSize) {
+          largestSize = Object.keys(obj[key]).length
+          largestObject = obj[key]
+        }
+        const nestedObject = this.findLargestObjectByKey(obj[key], targetKey)
+        if (
+          nestedObject !== null &&
+          Object.keys(nestedObject).length > largestSize
+        ) {
+          largestSize = Object.keys(nestedObject).length
+          largestObject = nestedObject
+        }
+      }
+    }
+    return largestObject
+  }
+
+  parse(data) {
     const {
       address,
       price,
@@ -100,8 +141,8 @@ class HomeDetailsAPI {
         time: history.time
       })),
       rents: [],
-      comps: (comps || []).map((comp) => HomeDetailsAPI.parse(comp)),
-      nearbyHomes: (nearbyHomes || []).map((home) => HomeDetailsAPI.parse(home))
+      comps: (comps || []).map((comp) => this.parse(comp)),
+      nearbyHomes: (nearbyHomes || []).map((home) => this.parse(home))
     })
   }
 }

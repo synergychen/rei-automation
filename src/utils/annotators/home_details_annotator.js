@@ -173,6 +173,10 @@ class HomeDetailsAnnotator {
         COLORS.lightYellow,
         COLORS.yellow
       )
+    } else if (daysOnMarket <= 3) {
+      this.addChip(chipClassName, `DOM <= 3`, COLORS.lightRed, COLORS.red)
+    } else if (daysOnMarket <= 7) {
+      this.addChip(chipClassName, `DOM <= 7`, COLORS.lightRed, COLORS.red)
     } else {
       this.addChip(chipClassName, `DOM < 30`, COLORS.lightRed, COLORS.red)
     }
