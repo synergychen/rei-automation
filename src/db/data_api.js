@@ -24,6 +24,12 @@ class DataAPI {
     return DataAPI.SECURITY_TOKEN
   }
 
+  verifyToken() {
+    if (!this.securityToken) {
+      throw new Error('Missing security token')
+    }
+  }
+
   // ------------------
   // --- Properties ---
   // ------------------
@@ -172,10 +178,11 @@ class DataAPI {
   }
 
   getRequest(url, absoluteUrl = false) {
+    this.verifyToken()
     url = absoluteUrl ? url : DataAPI.BASE_URL + url
     return fetch(url, {
       headers: {
-        Authorization: 'Bearer ' + DataAPI.SECURITY_TOKEN
+        Authorization: 'Bearer ' + this.securityToken
       }
     })
       .then((response) => {
@@ -190,11 +197,12 @@ class DataAPI {
   }
 
   postRequest(url, data) {
+    this.verifyToken()
     return fetch(DataAPI.BASE_URL + url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + DataAPI.SECURITY_TOKEN
+        Authorization: 'Bearer ' + this.securityToken
       },
       body: JSON.stringify(data)
     })
@@ -210,11 +218,12 @@ class DataAPI {
   }
 
   updateRequest(url, data) {
+    this.verifyToken()
     return fetch(DataAPI.BASE_URL + url, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + DataAPI.SECURITY_TOKEN
+        Authorization: 'Bearer ' + this.securityToken
       },
       body: JSON.stringify(data)
     })
@@ -230,10 +239,11 @@ class DataAPI {
   }
 
   deleteRequest(url) {
+    this.verifyToken()
     return fetch(DataAPI.BASE_URL + url, {
       method: 'DELETE',
       headers: {
-        Authorization: 'Bearer ' + DataAPI.SECURITY_TOKEN
+        Authorization: 'Bearer ' + this.securityToken
       }
     })
       .then((response) => {
