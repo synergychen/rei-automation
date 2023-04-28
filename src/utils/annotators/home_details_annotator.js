@@ -77,7 +77,6 @@ class HomeDetailsAnnotator {
     if (this.property && rents.length > 0) {
       const obj = {
         Year: this.property.yearBuilt,
-        'Days on Market': this.property.daysOnMarket
       }
       rents.forEach((rent) => {
         obj['Rent / ' + rent.source] = rent.median
@@ -156,33 +155,45 @@ class HomeDetailsAnnotator {
     const property = this.property
     const step = 30
     const daysOnMarket = property.daysOnMarket
-    const daysOnMarketLabel =
-      property.daysOnMarket > 0
-        ? Math.floor(property.daysOnMarket / step) * step
-        : -1
+    const daysOnMarketLabel = `DOM: ${property.daysOnMarket}`
 
     if (daysOnMarketLabel === -1) return
 
     if (daysOnMarket >= step * 2) {
       this.addChip(
         chipClassName,
-        `DOM: ${daysOnMarketLabel}+`,
+        daysOnMarketLabel,
         COLORS.lightGreen,
         COLORS.green
       )
     } else if (daysOnMarket >= step) {
       this.addChip(
         chipClassName,
-        `DOM: ${daysOnMarketLabel}+`,
+        daysOnMarketLabel,
         COLORS.lightYellow,
         COLORS.yellow
       )
     } else if (daysOnMarket <= 3) {
-      this.addChip(chipClassName, `DOM <= 3`, COLORS.lightRed, COLORS.red)
+      this.addChip(
+        chipClassName,
+        daysOnMarketLabel,
+        COLORS.lightRed,
+        COLORS.red
+      )
     } else if (daysOnMarket <= 7) {
-      this.addChip(chipClassName, `DOM <= 7`, COLORS.lightRed, COLORS.red)
+      this.addChip(
+        chipClassName,
+        daysOnMarketLabel,
+        COLORS.lightRed,
+        COLORS.red
+      )
     } else {
-      this.addChip(chipClassName, `DOM < 30`, COLORS.lightRed, COLORS.red)
+      this.addChip(
+        chipClassName,
+        daysOnMarketLabel,
+        COLORS.lightRed,
+        COLORS.red
+      )
     }
   }
 

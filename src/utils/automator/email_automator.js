@@ -43,7 +43,7 @@ class EmailAutomator {
       const message = messages[i]
       await this.processMessage(message)
       await this.markMessageAsRead(message.id)
-      await this.pause(3000)
+      await this.pause(5000)
     }
   }
 

@@ -33,6 +33,14 @@ class Property {
     return validData && validStatus
   }
 
+  get missingStatus() {
+    return !this.homeStatus
+  }
+
+  get onMarket() {
+    return this.homeStatus == "FOR_SALE"
+  }
+
   // Average house size for different bedrooms
   // - 2-bedroom: 1,300
   // - 3-bedroom: 1,600

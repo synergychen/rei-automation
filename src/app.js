@@ -21,7 +21,8 @@ const paths = [
   "src/utils/automator/email_automator.js",
   "src/utils/automator/rentometer_automator.js",
   "src/utils/parsers/home_details_parser.js",
-  "src/utils/parsers/rent_parser.js"
+  "src/utils/parsers/rent_parser.js",
+  "src/utils/sync/home_details_autosaver.js"
 ]
 paths.forEach((path) => {
   const obj = require('../' + path)
