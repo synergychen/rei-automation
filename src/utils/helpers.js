@@ -1,3 +1,9 @@
+const { US_ADDRESS_REGEX } = require('./constants.js')
+
+function matchAddresses(str) {
+  return str.match(US_ADDRESS_REGEX)
+}
+
 // Calculates the rent to price ratio of a property given the monthly rent and sale price
 function rentToPrice(rent, price) {
   if (rent <= 0 || price <= 0) return -1
@@ -152,8 +158,23 @@ function logMessage(message) {
   const now = new Date()
   const timeStr = now.toLocaleTimeString()
 
+  // process message
+  let processedMessage = message
+  processedMessage = processedMessage.replace(
+    /successfully/gi,
+    '<span style="color: green;">Successfully</span>'
+  )
+  processedMessage = processedMessage.replace(
+    /failed/gi,
+    '<span style="color: red;">Failed</span>'
+  )
+  processedMessage = processedMessage.replace(
+    US_ADDRESS_REGEX,
+    '<a href="https://www.zillow.com/homes/$&" target="_blank">$&</a>'
+  )
+
   // format message with time prefix
-  const messageStr = `[${timeStr}] ${message}`
+  const messageStr = `[${timeStr}] ${processedMessage}`
 
   // check if banner element exists
   let banner = document.getElementById('banner')
@@ -168,11 +189,12 @@ function logMessage(message) {
 
   // prepend message to banner element
   const messageElem = document.createElement('div')
-  messageElem.innerText = messageStr
+  messageElem.innerHTML = messageStr
   banner.insertBefore(messageElem, banner.firstChild)
 }
 
 module.exports = {
+  matchAddresses,
   rentToPrice,
   toDollar,
   toPercent,

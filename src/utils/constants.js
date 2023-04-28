@@ -51,4 +51,7 @@ const STATUS = {
   offer: 'OFFER'
 }
 
-module.exports = { PROPERTY_ATTRIBTUES, COLORS, STATUS }
+const US_ADDRESS_REGEX =
+  /(\d+\s+[\w\s]+(?:\b[A-Z]\w*)*),?\s+([A-Za-z]+),?\s+([A-Z]{2}),?\s+(\d{5})(-\d{4})?/g
+
+module.exports = { PROPERTY_ATTRIBTUES, COLORS, STATUS, US_ADDRESS_REGEX }
