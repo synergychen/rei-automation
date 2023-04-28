@@ -155,21 +155,25 @@ class HomeDetailsAnnotator {
 
     const property = this.property
     const step = 30
-    const daysOnMarket =
+    const daysOnMarket = property.daysOnMarket
+    const daysOnMarketLabel =
       property.daysOnMarket > 0
         ? Math.floor(property.daysOnMarket / step) * step
         : -1
+
+    if (daysOnMarketLabel === -1) return
+
     if (daysOnMarket >= step * 2) {
       this.addChip(
         chipClassName,
-        `DOM: ${daysOnMarket}+`,
+        `DOM: ${daysOnMarketLabel}+`,
         COLORS.lightGreen,
         COLORS.green
       )
     } else if (daysOnMarket >= step) {
       this.addChip(
         chipClassName,
-        `DOM: ${daysOnMarket}+`,
+        `DOM: ${daysOnMarketLabel}+`,
         COLORS.lightYellow,
         COLORS.yellow
       )
