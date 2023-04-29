@@ -41,6 +41,7 @@ const COLORS = {
  * - INTERESTED: potential to an offer
  * - NOT_INTERESTED: skip
  * - OFFER: potential offer
+ * - DELETE: no longer needed
  */
 const STATUS = {
   default: 'DEFAULT',
@@ -48,7 +49,8 @@ const STATUS = {
   notADeal: 'NOT_A_DEAL',
   interested: 'INTERESTED',
   notInterested: 'NOT_INTERESTED',
-  offer: 'OFFER'
+  offer: 'OFFER',
+  delete: 'DELETE'
 }
 
 const US_ADDRESS_REGEX =

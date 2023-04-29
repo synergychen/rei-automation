@@ -7,21 +7,27 @@ const {
   findElementUntil,
   encodeUrlParams
 } = require('../helpers.js')
-const { currentProperty } = require('../session.js')
-const { PropertyAnalyzer } = require('../analyzers/property_analyzer.js')
+const { currentProperty, savedProperty } = require('../session.js')
 
 class HomeDetailsAnnotator {
   constructor() {
     this.dataApi = new DataAPI()
     this.property = null
+    this.saved = null
   }
 
   static async annotate() {
     const annotator = new HomeDetailsAnnotator()
     annotator.property = await currentProperty()
+    annotator.saved = await savedProperty()
 
     if (!annotator.property) {
       console.log('Current property not exists')
+      return
+    }
+
+    if (!annotator.property.valid) {
+      console.log('Skip annotation as the property is invalid')
       return
     }
 
@@ -34,28 +40,31 @@ class HomeDetailsAnnotator {
     // Add summary detail
     await this.renderHomeSummary()
     // Render status select
-    this.renderSelects()
+    if (this.saved) {
+      this.renderStatusSelect()
+    }
     // Render links
     await this.renderLinks()
     // Render chips
     await this.renderChips()
   }
 
-  renderSelects() {
+  renderStatusSelect() {
     this.addContainer('selects-container')
     this.renderStatusSelect()
   }
 
   async renderLinks() {
     this.addContainer('links-container')
-    if (!this.property.isAnalyzed) {
-      // Add "Analyze" link
-      this.renderAnalyzeLink()
+    if (this.saved) {
+      // Add Rentometer link
+      await this.renderRentometerLink()
+      // Add BP rent calculator link
+      await this.renderBPRentLink()
+    } else {
+      // Add "Add" property link
+      this.renderSaveButton()
     }
-    // Add Rentometer link
-    await this.renderRentometerLink()
-    // Add BP rent calculator link
-    await this.renderBPRentLink()
     // Add lot lines
     await this.renderLotLines()
   }
@@ -76,7 +85,7 @@ class HomeDetailsAnnotator {
     const rents = this.property.rents
     if (this.property && rents.length > 0) {
       const obj = {
-        Year: this.property.yearBuilt,
+        Year: this.property.yearBuilt
       }
       rents.forEach((rent) => {
         obj['Rent / ' + rent.source] = rent.median
@@ -106,8 +115,14 @@ class HomeDetailsAnnotator {
     }
 
     select.addEventListener('change', async (event) => {
-      this.property.status = event.target.value
-      await this.dataApi.updateProperty(this.property)
+      const status = event.target.value
+      this.property.status = status
+      if (status === STATUS.delete) {
+        await this.dataApi.removeProperty(this.property.address)
+        window.location.reload()
+      } else {
+        await this.dataApi.updateProperty(this.property)
+      }
     })
 
     const targetElement = document.getElementById('selects-container')
@@ -115,14 +130,18 @@ class HomeDetailsAnnotator {
     targetElement.appendChild(select)
   }
 
-  renderAnalyzeLink() {
-    const element = this.addLink('Analyze')
+  renderSaveButton() {
+    const element = this.addLink('Save')
     element.href = '#'
-    element.onclick = async () => {
-      await PropertyAnalyzer.analyze()
+    element.onclick = async (event) => {
+      event.preventDefault()
+      if (this.property.valid) {
+        await this.dataApi.addProperty(this.property)
+      } else {
+        alert('Unable to add an invalid property')
+      }
       return false
     }
-    element.textContent = 'Analyze'
   }
 
   async renderPriceChanges() {

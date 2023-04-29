@@ -7,14 +7,13 @@ class HomeDetailsAutosaver {
     const property = await currentProperty()
     const saved = await savedProperty()
     console.log('Property:', property)
-    if (property.onMarket || saved.missingStatus) {
-      if (saved) {
-        await dataApi.updateProperty(property)
-        console.log('Property updated')
-      } else {
-        await dataApi.addProperty(property)
-        console.log('Property added')
-      }
+    if (saved && property.valid && (property.onMarket || saved.missingStatus)) {
+      // Update when
+      // 1. property saved before
+      // 2. property valid
+      // 3. property still on market
+      await dataApi.updateProperty(property)
+      console.log('Property updated')
     } else if (!property.valid) {
       console.log('Property invalid')
     } else {
