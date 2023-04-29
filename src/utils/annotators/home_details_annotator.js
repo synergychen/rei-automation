@@ -41,7 +41,7 @@ class HomeDetailsAnnotator {
     await this.renderHomeSummary()
     // Render status select
     if (this.saved) {
-      this.renderStatusSelect()
+      this.renderSelects()
     }
     // Render links
     await this.renderLinks()
@@ -49,7 +49,7 @@ class HomeDetailsAnnotator {
     await this.renderChips()
   }
 
-  renderStatusSelect() {
+  renderSelects() {
     this.addContainer('selects-container')
     this.renderStatusSelect()
   }

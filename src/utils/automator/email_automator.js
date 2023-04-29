@@ -61,8 +61,12 @@ class EmailAutomator {
       const address = addresses[i]
       const property = addressToPropertyMap[address]
       if (property) {
-        await this.dataApi.addProperty(property)
-        logMessage(`Saved property: ${property.address}`)
+        if (property.valid) {
+          await this.dataApi.addProperty(property)
+          logMessage(`Saved property: ${property.address}`)
+        } else {
+          logMessage(`Skipped invalid property: ${property.address}`)
+        }
       } else {
         logMessage(`Property not found on zillow: ${property.address}`)
       }
