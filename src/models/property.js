@@ -163,7 +163,6 @@ class Property {
   getDeal(percentThreshold = 0.7) {
     const deal = new Deal({
       property: this,
-      rents: this.rents,
       percentThreshold
     })
     return deal

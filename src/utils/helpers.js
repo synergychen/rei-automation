@@ -165,6 +165,10 @@ function logMessage(message) {
     '<span style="color: green;">Successfully</span>'
   )
   processedMessage = processedMessage.replace(
+    /skipped/gi,
+    '<span style="color: orange;">Skipped</span>'
+  )
+  processedMessage = processedMessage.replace(
     /failed/gi,
     '<span style="color: red;">Failed</span>'
   )

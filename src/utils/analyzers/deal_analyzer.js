@@ -7,10 +7,8 @@ class DealAnalyzer {
     const properties = await dataApi.properties()
     const filteredProperties = await Promise.all(
       properties.map(async (property) => {
-        const rents = property.rents
         const deal = new Deal({
           property,
-          rents,
           percentThreshold
         })
         return deal.isGood() ? property : null

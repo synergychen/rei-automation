@@ -5,11 +5,12 @@ class Deal {
 
   constructor({
     property,
-    rents = [],
     percentThreshold = Deal.RENT_TO_PRICE_PERCENT_THRESHOLD
   }) {
     this.property = property
-    this.rents = rents.map(rent => new Rent(rent))
+    this.rents = this.property.rents
+      .filter((rent) => rent.valid)
+      .map((rent) => new Rent(rent))
     this.percentThreshold = percentThreshold
   }
 

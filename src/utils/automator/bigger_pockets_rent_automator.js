@@ -33,6 +33,7 @@ class BiggerPocketsRentAutomator {
           logMessage('Failed to fetch rent')
         }
         await this.pause(3000)
+        logMessage(`${properties.length - i - 1} remaining`)
       }
       logMessage('Finished!')
     } catch (error) {

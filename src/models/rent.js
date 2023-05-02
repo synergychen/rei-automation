@@ -11,7 +11,8 @@ class Rent {
     pct25th = null,
     pct75th = null,
     count = null,
-    source = null
+    source = null,
+    error = null
   } = {}) {
     this.address = address
     this.zipcode = zipcode
@@ -21,6 +22,7 @@ class Rent {
     this.pct75th = pct75th
     this.count = count
     this.source = source
+    this.error = error
   }
 
   get key() {
@@ -37,6 +39,14 @@ class Rent {
 
   get hasRentometer() {
     return this.source === Rent.RENTOMETER
+  }
+
+  get hasError() {
+    return !!this.error
+  }
+
+  get valid() {
+    return !this.hasError && this.median > 0 && !!this.source
   }
 
   setRentometer() {

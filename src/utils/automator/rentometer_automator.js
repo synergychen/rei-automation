@@ -6,6 +6,7 @@ class RentometerAutomator {
   constructor(addresses = []) {
     this.dataApi = new DataAPI()
     this.addresses = addresses
+    this.pauseTime = 5000
   }
 
   async start(authToken, recaptchaToken) {
@@ -25,16 +26,31 @@ class RentometerAutomator {
           recaptchaToken
         )
         if (rent) {
-          logMessage('Successfully fetched rent')
-          property.updateRent(rent)
-          const updated = await this.dataApi.updateProperty(property)
-          updated
-            ? logMessage('Successfully updated property')
-            : logMessage('Failed to update property')
+          if (rent.valid) {
+            logMessage('Successfully fetched rent')
+            property.updateRent(rent)
+            const updated = await this.dataApi.updateProperty(property)
+            updated
+              ? logMessage('Successfully updated property')
+              : logMessage('Failed to update property')
+            this.pauseTime = 5000
+          } else {
+            if (rent.error.includes('too narrow of a search')) {
+              property.updateRent(rent)
+              const updated = await this.dataApi.updateProperty(property)
+              updated
+                ? logMessage('Rent search is too narrow')
+                : logMessage('Failed to update rent')
+              this.pauseTime = 5000
+            }
+          }
         } else {
-          logMessage('Failed to fetch rent')
+          if (rent.hasError) logMessage(`Failed to fetch rent: ${rent.error}`)
+          console.log(rent.error)
+          this.pauseTime += 5000
         }
-        await this.pause(5000)
+        await this.pause(this.pauseTime)
+        logMessage(`${properties.length - i - 1} remaining`)
       }
       logMessage('Finished!')
     } catch (error) {

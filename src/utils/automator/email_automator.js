@@ -44,6 +44,7 @@ class EmailAutomator {
       await this.processMessage(message)
       await this.markMessageAsRead(message.id)
       await this.pause(5000)
+      logMessage(`${messages.length - i - 1} remaining`)
     }
   }
 
@@ -63,7 +64,7 @@ class EmailAutomator {
       if (property) {
         if (property.valid) {
           await this.dataApi.addProperty(property)
-          logMessage(`Saved property: ${property.address}`)
+          logMessage(`Successfully saved property: ${property.address}`)
         } else {
           logMessage(`Skipped invalid property: ${property.address}`)
         }

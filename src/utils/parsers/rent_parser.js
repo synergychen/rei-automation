@@ -13,7 +13,8 @@ class RentParser {
       pct25th: this.pct25th,
       pct75th: this.pct75th,
       count: this.count,
-      source: null
+      source: this.source,
+      error: this.error
     })
   }
 
@@ -35,8 +36,19 @@ class RentParser {
 
   get count() {}
 
+  get error() {}
+
   parseValue(priceStr) {
     return parseInt(priceStr.replaceAll('$', '').replaceAll(',', ''))
+  }
+
+  parseValueFromSelector(selector) {
+    try {
+      const el = this.target.querySelector(selector)
+      return this.parseValue(el.value || el.innerText)
+    } catch (error) {
+      return null
+    }
   }
 }
 
@@ -57,58 +69,67 @@ class RentometerRentParser extends RentParser {
   }
 
   get zipcode() {
-    if (this.useZipcode()) {
-      const resultText = this.target
-        .querySelector('h3.result-address-header')
-        .innerText.replace(/quickview/i, '')
-        .trim()
-        .match(/\d{5}$/)
-      return resultText && resultText[0]
+    try {
+      if (this.useZipcode()) {
+        const resultText = this.target
+          .querySelector('h3.result-address-header')
+          .innerText.replace(/quickview/i, '')
+          .trim()
+          .match(/\d{5}$/)
+        return resultText && resultText[0]
+      }
+      return null
+    } catch (error) {
+      return null
     }
-    return null
   }
 
   get bedrooms() {
-    return parseInt(
-      this.target.querySelector('select#zip_unified_search_bed_style').value
-    )
+    return this.parseValueFromSelector('select#zip_unified_search_bed_style')
   }
 
   get average() {
-    return this.parseValue(
-      this.target.querySelector("[title='Sample Mean']").innerText
-    )
+    return this.parseValueFromSelector("[title='Sample Mean']")
   }
 
   get median() {
-    return this.parseValue(
-      this.target.querySelector("[title='Sample Median']").innerText
-    )
+    return this.parseValueFromSelector("[title='Sample Median']")
   }
 
   get pct25th() {
-    return this.parseValue(
-      this.target.querySelector(
-        "[title^='This is the estimated value of the 25th']"
-      ).innerText
+    return this.parseValueFromSelector(
+      "[title^='This is the estimated value of the 25th']"
     )
   }
 
   get pct75th() {
-    return this.parseValue(
-      this.target.querySelector(
-        "[title^='This is the estimated value of the 75th']"
-      ).innerText
+    return this.parseValueFromSelector(
+      "[title^='This is the estimated value of the 75th']"
     )
   }
 
   get count() {
-    const summary = this.target
-      .querySelector('#active-results-container')
-      .innerText.replace(/\n/g, ' ')
-      .replace(/\s+/g, ' ')
-      .match(/Results based on (\d+), .* within (\d+) months/)
-    return parseInt(summary[1])
+    try {
+      const summary = this.target
+        .querySelector('#active-results-container')
+        .innerText.replace(/\n/g, ' ')
+        .replace(/\s+/g, ' ')
+        .match(/Results based on (\d+), .* within (\d+) months/)
+      return parseInt(summary[1])
+    } catch (error) {
+      return null
+    }
+  }
+
+  get error() {
+    try {
+      return this.target
+        .querySelector('.alert-warning')
+        .innerText.split('\n')
+        .slice(-1)[0]
+    } catch (error) {
+      return 'Unknown error'
+    }
   }
 
   useAddress() {

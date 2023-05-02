@@ -71,7 +71,11 @@ class RentometerAPI {
       const html = await response.text()
       const parser = new DOMParser()
       const htmlDoc = parser.parseFromString(html, 'text/html')
-      return RentometerRentParser.parse(htmlDoc)
+      const rent = RentometerRentParser.parse(htmlDoc)
+      if (rent.hasError) {
+        console.log(rent.error)
+      }
+      return rent
     } catch (error) {
       console.log(error)
       return null

@@ -26,10 +26,10 @@ class HomeDetailsAnnotator {
       return
     }
 
-    if (!annotator.property.valid) {
-      console.log('Skip annotation as the property is invalid')
-      return
-    }
+    // if (!annotator.property.valid) {
+    //   console.log('Skip annotation as the property is invalid')
+    //   return
+    // }
 
     await annotator.annotate()
   }
