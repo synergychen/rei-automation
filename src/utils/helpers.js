@@ -19,9 +19,8 @@ function toDollar(amount) {
 }
 
 // Formats a number as a percentage with two decimal places and a trailing percent symbol
-function toPercent(num) {
-  if (num < 0) return 'N/A'
-  return (num * 100).toFixed(2) + '%'
+function toPercent(num, digit = 2) {
+  return (num * 100).toFixed(digit) + '%'
 }
 
 // Calculates the average of an array of numbers and rounds to the nearest thousand

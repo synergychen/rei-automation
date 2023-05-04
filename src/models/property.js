@@ -1,5 +1,6 @@
 const { PROPERTY_ATTRIBTUES, STATUS } = require('../utils/constants.js')
 const { Rent } = require('./rent.js')
+const { median, toPercent } = require('../utils/helpers.js')
 
 class Property {
   static TWO_BEDS_MEDIAN_SIZE = 1300
@@ -13,8 +14,9 @@ class Property {
       this[variable] = props[variable] ?? null
     }
 
-    this.rents ||= []
-    this.rents = this.rents.map((rent) => new Rent(rent))
+    this.rents = (this.rents || []).map((rent) => new Rent(rent))
+    this.comps = this.mapToProperties(this.comps)
+    this.nearbyHomes = this.mapToProperties(this.nearbyHomes)
     this.schoolScores ||= []
     this.priceHistory ||= []
     this.status ||= STATUS.default
@@ -29,7 +31,9 @@ class Property {
       this.bedrooms > 0 &&
       this.price > 0 &&
       this.sqft > 0
-    const validStatus = (this.homeStatus ? this.homeStatus === Property.FOR_SALE : true)
+    const validStatus = this.homeStatus
+      ? this.homeStatus === Property.FOR_SALE
+      : true
     return validData && validStatus
   }
 
@@ -38,7 +42,7 @@ class Property {
   }
 
   get onMarket() {
-    return this.homeStatus == "FOR_SALE"
+    return this.homeStatus == 'FOR_SALE'
   }
 
   // Average house size for different bedrooms
@@ -137,6 +141,16 @@ class Property {
     return this.status === STATUS.isInterested
   }
 
+  medianValueOf(attribute, properties) {
+    return median(properties.map((property) => property[attribute]))
+  }
+
+  medianDiffPercent(attribute, properties) {
+    const val = this[attribute] / this.medianValueOf(attribute, properties) - 1
+    const percent = toPercent(val, 0)
+    return val > 0 ? '+' + percent : percent
+  }
+
   setDeal() {
     this.status = STATUS.deal
   }
@@ -188,6 +202,10 @@ class Property {
       .toISOString()
       .replace(/T/, ' ')
       .replace(/\..+/, '')
+  }
+
+  mapToProperties(properties) {
+    return (properties || []).map((property) => new Property(property))
   }
 
   updateRent(rent) {

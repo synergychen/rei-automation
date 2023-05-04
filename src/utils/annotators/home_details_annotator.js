@@ -79,6 +79,8 @@ class HomeDetailsAnnotator {
     await this.renderSizeChip()
     // Add school rating
     await this.renderSchoolChip()
+    // Add comp and nearby chips
+    await this.renderCompsAndNearbyHomesChips()
   }
 
   async renderHomeSummary() {
@@ -246,6 +248,95 @@ class HomeDetailsAnnotator {
       )
     } else if (property.allBadSchools) {
       this.addChip(chipClassName, 'SCH: Bad', COLORS.lightRed, COLORS.red)
+    }
+  }
+
+  async renderCompsAndNearbyHomesChips() {
+    const chipClassName = 'comp-and-nearby-chips'
+    if (document.querySelector('.' + chipClassName)) return
+
+    const property = this.property
+
+    if (property.price / property.medianValueOf('price', property.comps) < 1) {
+      this.addChip(
+        chipClassName,
+        `Price: ${property.medianDiffPercent('price', property.comps)} Comp`,
+        COLORS.lightGreen,
+        COLORS.green
+      )
+    } else {
+      this.addChip(
+        chipClassName,
+        `Price: ${property.medianDiffPercent('price', property.comps)} Comp`,
+        COLORS.lightRed,
+        COLORS.red
+      )
+    }
+
+    if (property.sqft / property.medianValueOf('sqft', property.comps) < 1) {
+      this.addChip(
+        chipClassName,
+        `Size: ${property.medianDiffPercent('sqft', property.comps)} Comp`,
+        COLORS.lightRed,
+        COLORS.red
+      )
+    } else {
+      this.addChip(
+        chipClassName,
+        `Size: ${property.medianDiffPercent('sqft', property.comps)} Comp`,
+        COLORS.lightGreen,
+        COLORS.green
+      )
+    }
+
+    if (
+      property.price / property.medianValueOf('price', property.nearbyHomes) <
+      1
+    ) {
+      this.addChip(
+        chipClassName,
+        `Price: ${property.medianDiffPercent(
+          'price',
+          property.nearbyHomes
+        )} Nearby`,
+        COLORS.lightGreen,
+        COLORS.green
+      )
+    } else {
+      this.addChip(
+        chipClassName,
+        `Price: ${property.medianDiffPercent(
+          'price',
+          property.nearbyHomes
+        )} Nearby`,
+        COLORS.lightRed,
+        COLORS.red
+      )
+    }
+
+    if (
+      property.sqft / property.medianValueOf('sqft', property.nearbyHomes) <
+      1
+    ) {
+      this.addChip(
+        chipClassName,
+        `Size: ${property.medianDiffPercent(
+          'sqft',
+          property.nearbyHomes
+        )} Nearby`,
+        COLORS.lightRed,
+        COLORS.red
+      )
+    } else {
+      this.addChip(
+        chipClassName,
+        `Size: ${property.medianDiffPercent(
+          'sqft',
+          property.nearbyHomes
+        )} Nearby`,
+        COLORS.lightGreen,
+        COLORS.green
+      )
     }
   }
 
